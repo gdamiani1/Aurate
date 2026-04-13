@@ -1,6 +1,10 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import dotenv from "dotenv";
+import { authRoutes } from "./routes/auth";
+import { auraRoutes } from "./routes/aura";
+import { leaderboardRoutes } from "./routes/leaderboard";
+import { friendRoutes } from "./routes/friends";
 
 dotenv.config();
 
@@ -9,6 +13,11 @@ const app = Fastify({ logger: true });
 app.register(cors, { origin: true });
 
 app.get("/health", async () => ({ status: "cooking", aura: "immaculate" }));
+
+app.register(authRoutes);
+app.register(auraRoutes);
+app.register(leaderboardRoutes);
+app.register(friendRoutes);
 
 const start = async () => {
   try {
