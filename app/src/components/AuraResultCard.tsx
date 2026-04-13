@@ -85,8 +85,8 @@ export default function AuraResultCard({
             )}
             {/* Gradient fade from image into overlay */}
             <LinearGradient
-              colors={["transparent", "transparent", "rgba(10,10,15,0.7)", "rgba(10,10,15,0.9)"]}
-              locations={[0, 0.5, 0.8, 1]}
+              colors={["transparent", "rgba(10,10,15,0.3)", "rgba(10,10,15,0.8)", "rgba(10,10,15,0.95)"]}
+              locations={[0, 0.4, 0.7, 1]}
               style={styles.imageFade}
             />
             {/* Tier badge on image */}
@@ -220,12 +220,18 @@ const styles = StyleSheet.create({
     fontSize: 56,
     fontWeight: "900",
     letterSpacing: -2,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
   scoreLabel: {
     fontSize: 14,
     fontWeight: "700",
-    color: COLORS.textMuted,
+    color: "#fff",
     letterSpacing: 4,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
 
   // Glow line
@@ -241,17 +247,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     fontStyle: "italic",
-    color: COLORS.textPrimary,
+    color: "#fff",
     lineHeight: 23,
     marginBottom: SPACING.md,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
   },
 
   // Personality
   personality: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: "rgba(255,255,255,0.8)",
     lineHeight: 19,
     marginBottom: SPACING.md,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
 
   // Watermark
