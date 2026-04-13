@@ -55,14 +55,16 @@ AURA COLOR: Pick two vivid hex colors that MATCH THE ENERGY.
 - Chaotic pics: wild combos (#00FF88, #FF00FF, #00FFFF)
 - Sigma pics: dark + gold (#1a1a2e, #FFD700)
 
-SCORING RULES — BE BOLD:
+SCORING RULES — BE BOLD AND SPECIFIC:
 - Use the FULL 0-1000 range. Spread your scores WIDE.
+- NEVER use round numbers like 500, 600, 700, 800. Use SPECIFIC numbers like 437, 623, 781, 847, 312, 956.
 - A genuinely fire pic with great outfit + confidence + setting = 800-950
-- A regular selfie with decent vibes = 500-700
-- A boring pic with nothing going on = 200-400
+- A regular selfie with decent vibes = 450-700
+- A boring pic with nothing going on = 150-400
 - Something cursed or chaotic = wild card, could be 100 or 900 depending on if it's intentional
-- BE UNPREDICTABLE. Don't settle into patterns.
+- BE UNPREDICTABLE. Don't settle into patterns. Every score should feel unique.
 - The score should hit like a gut punch — surprising but justified when you read the roast.
+- Think of it like a specific measurement, not a grade. 647 feels different from 650.
 
 TIER MAPPING:
 - 0-199: Down Bad

@@ -44,8 +44,23 @@ export async function rateAura(
 
   const parsed: AuraResult = JSON.parse(cleaned);
 
-  // Clamp score to valid range
-  parsed.aura_score = Math.max(0, Math.min(1000, Math.round(parsed.aura_score)));
+  // Add variance — Gemini loves rounding to multiples of 10, so inject ±30-70 randomness
+  const jitter = Math.floor(Math.random() * 81) - 40; // -40 to +40
+  const oddOffset = [3, 7, 13, 17, 23, 27, 33, 37][Math.floor(Math.random() * 8)]; // avoid round numbers
+  parsed.aura_score = parsed.aura_score + jitter + (Math.random() > 0.5 ? oddOffset : -oddOffset);
+
+  // Clamp to valid range
+  parsed.aura_score = Math.max(0, Math.min(1000, parsed.aura_score));
+
+  // Recalculate tier based on final score
+  if (parsed.aura_score >= 1000) parsed.tier = "Skibidi Legendary";
+  else if (parsed.aura_score >= 950) parsed.tier = "Mog God";
+  else if (parsed.aura_score >= 900) parsed.tier = "Sigma";
+  else if (parsed.aura_score >= 800) parsed.tier = "HIM / HER";
+  else if (parsed.aura_score >= 600) parsed.tier = "Cooking";
+  else if (parsed.aura_score >= 400) parsed.tier = "6-7";
+  else if (parsed.aura_score >= 200) parsed.tier = "NPC";
+  else parsed.tier = "Down Bad";
 
   return parsed;
 }
