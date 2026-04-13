@@ -85,8 +85,8 @@ export default function AuraResultCard({
             )}
             {/* Gradient fade from image into overlay */}
             <LinearGradient
-              colors={["transparent", "transparent", COLORS.bg]}
-              locations={[0, 0.6, 1]}
+              colors={["transparent", "transparent", "rgba(10,10,15,0.7)", "rgba(10,10,15,0.9)"]}
+              locations={[0, 0.5, 0.8, 1]}
               style={styles.imageFade}
             />
             {/* Tier badge on image */}
@@ -205,8 +205,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.lg,
-    backgroundColor: COLORS.bg,
-    marginTop: -(IMAGE_HEIGHT * 0.3), // bleed up into the image by 30%
+    backgroundColor: "transparent",
+    marginTop: -(IMAGE_HEIGHT * 0.3),
   },
 
   // Score
