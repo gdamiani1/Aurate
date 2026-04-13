@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import { COLORS, SPACING } from "../../src/constants/theme";
 import { SIGMA_PATHS } from "../../src/constants/paths";
 import { useAuthStore } from "../../src/store/authStore";
@@ -42,9 +41,6 @@ async function checkAura(
   sigmaPath: string,
   userId: string
 ): Promise<AuraResult> {
-  const fileInfo = await FileSystem.getInfoAsync(imageUri);
-  if (!fileInfo.exists) throw new Error("Image file not found");
-
   const fileName = imageUri.split("/").pop() || "photo.jpg";
   const fileType = fileName.endsWith(".png") ? "image/png" : "image/jpeg";
 
