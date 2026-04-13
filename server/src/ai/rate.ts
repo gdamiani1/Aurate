@@ -11,11 +11,13 @@ export async function rateAura(
   const systemPrompt = buildPrompt(path);
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 500,
+      maxOutputTokens: 2048,
       responseMimeType: "application/json",
+      // @ts-ignore - disable thinking to avoid token budget issues
+      thinkingConfig: { thinkingBudget: 0 },
     },
     systemInstruction: systemPrompt,
   });
@@ -33,7 +35,14 @@ export async function rateAura(
   const raw = result.response.text();
   if (!raw) throw new Error("AI returned empty response — aura too powerful to compute fr");
 
-  const parsed: AuraResult = JSON.parse(raw);
+  // Clean up response — strip markdown fences if Gemini wraps JSON
+  let cleaned = raw.trim();
+  if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
+  if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
+  if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
+  cleaned = cleaned.trim();
+
+  const parsed: AuraResult = JSON.parse(cleaned);
 
   // Clamp score to valid range
   parsed.aura_score = Math.max(0, Math.min(1000, Math.round(parsed.aura_score)));
