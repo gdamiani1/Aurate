@@ -9,18 +9,21 @@ export async function leaderboardRoutes(app: FastifyInstance) {
       limit?: string;
       offset?: string;
     };
-    const userIds = await redis.zrevrange(
+
+    // @upstash/redis zrange with rev: true returns [member, score, member, score, ...]
+    const results = await redis.zrange<string[]>(
       LEADERBOARD_KEYS.global,
       Number(offset),
       Number(offset) + Number(limit) - 1,
-      "WITHSCORES"
+      { rev: true, withScores: true }
     );
 
+    // Parse pairs: [member, score, member, score, ...]
     const entries = [];
-    for (let i = 0; i < userIds.length; i += 2) {
+    for (let i = 0; i < results.length; i += 2) {
       entries.push({
-        user_id: userIds[i],
-        peak_aura: Number(userIds[i + 1]),
+        user_id: results[i] as string,
+        peak_aura: Number(results[i + 1]),
       });
     }
     if (entries.length === 0) return { leaderboard: [] };
@@ -28,10 +31,7 @@ export async function leaderboardRoutes(app: FastifyInstance) {
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, username, display_name, avatar_url, tier, current_streak")
-      .in(
-        "id",
-        entries.map((e) => e.user_id)
-      );
+      .in("id", entries.map((e) => e.user_id));
     const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
     return {
@@ -47,26 +47,24 @@ export async function leaderboardRoutes(app: FastifyInstance) {
   app.get("/mogboard/path/:path", async (request) => {
     const { path } = request.params as { path: string };
     const { limit = "50" } = request.query as { limit?: string };
-    const userIds = await redis.zrevrange(
+
+    const results = await redis.zrange<string[]>(
       LEADERBOARD_KEYS.path(path),
       0,
       Number(limit) - 1,
-      "WITHSCORES"
+      { rev: true, withScores: true }
     );
 
     const entries = [];
-    for (let i = 0; i < userIds.length; i += 2) {
-      entries.push({ user_id: userIds[i], score: Number(userIds[i + 1]) });
+    for (let i = 0; i < results.length; i += 2) {
+      entries.push({ user_id: results[i] as string, score: Number(results[i + 1]) });
     }
     if (entries.length === 0) return { leaderboard: [] };
 
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, username, display_name, avatar_url, tier")
-      .in(
-        "id",
-        entries.map((e) => e.user_id)
-      );
+      .in("id", entries.map((e) => e.user_id));
     const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
     return {
@@ -94,9 +92,7 @@ export async function leaderboardRoutes(app: FastifyInstance) {
 
     const { data: profiles } = await supabase
       .from("profiles")
-      .select(
-        "id, username, display_name, avatar_url, peak_aura, tier, current_streak"
-      )
+      .select("id, username, display_name, avatar_url, peak_aura, tier, current_streak")
       .in("id", friendIds)
       .order("peak_aura", { ascending: false });
 

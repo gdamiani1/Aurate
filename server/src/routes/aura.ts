@@ -57,8 +57,8 @@ export async function auraRoutes(app: FastifyInstance) {
     if (dbError) return reply.status(500).send({ error: "DB crashed out. Try again." });
 
     // Update leaderboards
-    await redis.zadd(LEADERBOARD_KEYS.global, result.aura_score, userId);
-    await redis.zadd(LEADERBOARD_KEYS.path(sigmaPath), result.aura_score, userId);
+    await redis.zadd(LEADERBOARD_KEYS.global, { score: result.aura_score, member: userId });
+    await redis.zadd(LEADERBOARD_KEYS.path(sigmaPath), { score: result.aura_score, member: userId });
 
     // Update profile stats
     await supabase.rpc("update_profile_stats", { p_user_id: userId, p_score: result.aura_score, p_tier: result.tier });

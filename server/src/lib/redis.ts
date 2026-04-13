@@ -1,7 +1,8 @@
-import Redis from "ioredis";
+import { Redis } from "@upstash/redis";
 
-export const redis = new Redis(process.env.UPSTASH_REDIS_URL!, {
-  tls: { rejectUnauthorized: false },
+export const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_URL!,
+  token: process.env.UPSTASH_REDIS_TOKEN!,
 });
 
 export const LEADERBOARD_KEYS = {

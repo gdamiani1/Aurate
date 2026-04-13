@@ -1,13 +1,13 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import dotenv from "dotenv";
 import { authRoutes } from "./routes/auth";
 import { auraRoutes } from "./routes/aura";
 import { leaderboardRoutes } from "./routes/leaderboard";
 import { friendRoutes } from "./routes/friends";
 import { dailyRoutes } from "./routes/daily";
-
-dotenv.config();
 
 const app = Fastify({ logger: true });
 
