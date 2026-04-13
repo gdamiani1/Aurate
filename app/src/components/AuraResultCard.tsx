@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: IMAGE_HEIGHT * 0.4,
+    height: IMAGE_HEIGHT * 0.5,
   },
   tierPosition: {
     position: "absolute",
@@ -203,10 +203,10 @@ const styles = StyleSheet.create({
   // ─── Overlay section (bottom 60%) ───
   overlay: {
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.sm,
+    paddingTop: SPACING.lg,
     paddingBottom: SPACING.lg,
     backgroundColor: COLORS.bg,
-    marginTop: -SPACING.xl, // overlap into the image fade
+    marginTop: -(IMAGE_HEIGHT * 0.3), // bleed up into the image by 30%
   },
 
   // Score
