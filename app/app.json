@@ -20,7 +20,9 @@
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true,
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "NSPhotoLibraryAddUsageDescription": "Save your aura card to camera roll",
+        "NSPhotoLibraryUsageDescription": "Save your aura card to camera roll"
       }
     },
     "android": {
@@ -39,6 +41,13 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Aurate to save your aura cards to camera roll",
+          "savePhotosPermission": "Allow Aurate to save your aura cards to camera roll"
+        }
+      ],
       [
         "react-native-google-mobile-ads",
         {
