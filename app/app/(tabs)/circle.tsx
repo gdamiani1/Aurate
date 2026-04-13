@@ -15,7 +15,7 @@ import { COLORS, SPACING } from "../../src/constants/theme";
 import { getTierForScore } from "../../src/constants/tiers";
 import { useAuthStore } from "../../src/store/authStore";
 
-const API_URL = "http://localhost:3000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
 interface Friend {
   id: string;

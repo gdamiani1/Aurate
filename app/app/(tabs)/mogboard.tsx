@@ -14,7 +14,7 @@ import { SIGMA_PATHS, SigmaPathId } from "../../src/constants/paths";
 import { useAuthStore } from "../../src/store/authStore";
 import LeaderboardRow from "../../src/components/LeaderboardRow";
 
-const API_URL = "http://localhost:3000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
 type Tab = "global" | "path" | "circle";
 

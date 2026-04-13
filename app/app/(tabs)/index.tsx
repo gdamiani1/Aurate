@@ -17,7 +17,7 @@ import { SIGMA_PATHS } from "../../src/constants/paths";
 import { useAuthStore } from "../../src/store/authStore";
 import AuraResultCard from "../../src/components/AuraResultCard";
 
-const API_URL = "http://localhost:3000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const LOADING_MESSAGES = [
