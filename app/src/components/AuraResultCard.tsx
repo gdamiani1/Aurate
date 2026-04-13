@@ -7,12 +7,16 @@ import {
   Share,
   Image,
   Alert,
-  Platform,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ViewShot from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
 import { COLORS, SPACING } from "../constants/theme";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
+const CARD_HEIGHT = CARD_WIDTH * 1.4; // slightly taller than square for IG story feel
 
 interface AuraResult {
   aura_score: number;
@@ -35,30 +39,28 @@ export default function AuraResultCard({
 
   const handleShare = async () => {
     try {
+      if (!viewShotRef.current?.capture) return;
+      const uri = await viewShotRef.current.capture();
       await Share.share({
-        message: `I just got ${result.aura_score} aura (${result.tier}) on Aurate.\n\n"${result.roast}"\n\nGet your aura checked fr fr`,
+        url: uri,
+        message: `I scored ${result.aura_score} aura (${result.tier}) on Aurate 🔮\n\n"${result.roast}"`,
       });
-    } catch (_) {
-      // user cancelled
-    }
+    } catch (_) {}
   };
 
   const handleSave = async () => {
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission needed", "Allow access to save to camera roll");
+        Alert.alert("Need access", "Allow camera roll to save your aura card fr");
         return;
       }
-      if (!viewShotRef.current?.capture) {
-        Alert.alert("Error", "Could not capture the card");
-        return;
-      }
+      if (!viewShotRef.current?.capture) return;
       const uri = await viewShotRef.current.capture();
       await MediaLibrary.saveToLibraryAsync(uri);
-      Alert.alert("Saved", "Your aura card has been saved to camera roll");
+      Alert.alert("W", "Aura card saved to camera roll 🔮");
     } catch (err) {
-      Alert.alert("Error", "Failed to save image");
+      Alert.alert("L", "Failed to save. Try again ngl");
     }
   };
 
@@ -66,230 +68,229 @@ export default function AuraResultCard({
 
   return (
     <View style={styles.wrapper}>
+      {/* Capturable card — photo background with overlay */}
       <ViewShot
         ref={viewShotRef}
         options={{ format: "png", quality: 1 }}
         style={styles.captureArea}
       >
-        <View style={styles.card}>
-          {/* Photo with glowing gradient border */}
+        <View style={[styles.card, { borderColor: primary + "40" }]}>
+          {/* Photo as full background */}
           {imageUri && (
-            <View style={styles.photoSection}>
-              <View
-                style={[
-                  styles.photoGlowOuter,
-                  {
-                    shadowColor: primary,
-                  },
-                ]}
-              >
-                <LinearGradient
-                  colors={[primary, secondary, primary]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.photoGradientBorder}
-                >
-                  <View style={styles.photoInner}>
-                    <Image
-                      source={{ uri: imageUri }}
-                      style={styles.photo}
-                    />
-                  </View>
-                </LinearGradient>
-              </View>
-            </View>
+            <Image
+              source={{ uri: imageUri }}
+              style={styles.backgroundImage}
+              resizeMode="cover"
+            />
           )}
 
-          {/* Score */}
-          <Text style={styles.score}>{result.aura_score}</Text>
-          <Text style={styles.scoreLabel}>AURA SCORE</Text>
-
-          {/* Tier badge */}
-          <View
-            style={[
-              styles.tierBadge,
-              { backgroundColor: `${primary}30` },
+          {/* Gradient overlay — dark at bottom for text readability */}
+          <LinearGradient
+            colors={[
+              "transparent",
+              "rgba(0,0,0,0.15)",
+              "rgba(0,0,0,0.6)",
+              "rgba(0,0,0,0.92)",
             ]}
-          >
-            <Text style={[styles.tierText, { color: primary }]}>
-              {result.tier}
+            locations={[0, 0.3, 0.55, 0.75]}
+            style={styles.gradientOverlay}
+          />
+
+          {/* Top-left: Tier badge */}
+          <View style={styles.topRow}>
+            <View style={[styles.tierBadge, { backgroundColor: primary + "CC" }]}>
+              <Text style={styles.tierText}>{result.tier}</Text>
+            </View>
+          </View>
+
+          {/* Bottom content overlaid on gradient */}
+          <View style={styles.bottomContent}>
+            {/* Score */}
+            <View style={styles.scoreRow}>
+              <Text style={[styles.score, { textShadowColor: primary }]}>
+                {result.aura_score}
+              </Text>
+              <Text style={styles.scoreLabel}>AURA</Text>
+            </View>
+
+            {/* Aura glow line */}
+            <LinearGradient
+              colors={[primary, secondary, primary]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.glowLine}
+            />
+
+            {/* Roast */}
+            <Text style={styles.roast} numberOfLines={3}>
+              "{result.roast}"
             </Text>
+
+            {/* Personality read */}
+            <Text style={styles.personality} numberOfLines={3}>
+              {result.personality_read}
+            </Text>
+
+            {/* Watermark */}
+            <Text style={styles.watermark}>aurate</Text>
           </View>
-
-          {/* Roast quote card */}
-          <View style={styles.roastCard}>
-            <Text style={styles.roastQuoteMark}>{"\u201C"}</Text>
-            <Text style={styles.roastText}>{result.roast}</Text>
-            <Text style={styles.roastQuoteMarkEnd}>{"\u201D"}</Text>
-          </View>
-
-          {/* Personality read */}
-          <Text style={styles.personalityRead}>{result.personality_read}</Text>
-
-          {/* Watermark */}
-          <Text style={styles.watermark}>aurate</Text>
         </View>
       </ViewShot>
 
-      {/* Action buttons - outside capture area */}
+      {/* Action buttons — outside capture */}
       <View style={styles.actions}>
         <TouchableOpacity
-          style={styles.actionBtn}
+          style={[styles.actionBtn, { backgroundColor: primary + "20", borderColor: primary + "40" }]}
           onPress={handleShare}
           activeOpacity={0.8}
         >
-          <Text style={styles.actionBtnIcon}>{"^"}</Text>
-          <Text style={styles.actionBtnText}>Share</Text>
+          <Text style={styles.actionEmoji}>{"📤"}</Text>
+          <Text style={[styles.actionText, { color: primary }]}>Share</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={handleSave}
           activeOpacity={0.8}
         >
-          <Text style={styles.actionBtnIcon}>{"\u2193"}</Text>
-          <Text style={styles.actionBtnText}>Save</Text>
+          <Text style={styles.actionEmoji}>{"💾"}</Text>
+          <Text style={styles.actionText}>Save</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-const PHOTO_SIZE = 200;
-const BORDER_WIDTH = 4;
-
 const styles = StyleSheet.create({
   wrapper: {
     alignItems: "center",
   },
   captureArea: {
-    width: "100%",
-    borderRadius: 24,
+    width: CARD_WIDTH,
+    borderRadius: 20,
     overflow: "hidden",
   },
   card: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 24,
-    paddingTop: SPACING.xl,
-    paddingBottom: SPACING.lg,
-    paddingHorizontal: SPACING.lg,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-
-  // ─── Photo ───
-  photoSection: {
-    marginBottom: SPACING.lg,
-  },
-  photoGlowOuter: {
-    borderRadius: (PHOTO_SIZE + BORDER_WIDTH * 2) / 2 + 4,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 28,
-    elevation: 16,
-  },
-  photoGradientBorder: {
-    padding: BORDER_WIDTH,
-    borderRadius: (PHOTO_SIZE + BORDER_WIDTH * 2) / 2,
-  },
-  photoInner: {
-    borderRadius: PHOTO_SIZE / 2,
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 20,
     overflow: "hidden",
     backgroundColor: COLORS.bg,
-  },
-  photo: {
-    width: PHOTO_SIZE,
-    height: PHOTO_SIZE,
-    borderRadius: PHOTO_SIZE / 2,
+    borderWidth: 1.5,
+    position: "relative",
   },
 
-  // ─── Score ───
-  score: {
-    fontSize: 72,
-    fontWeight: "900",
-    color: COLORS.textPrimary,
-    letterSpacing: -3,
-    lineHeight: 78,
-  },
-  scoreLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: COLORS.textMuted,
-    letterSpacing: 4,
-    marginTop: 2,
-    marginBottom: SPACING.md,
+  // Photo fills entire card
+  backgroundImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: "100%",
+    height: "100%",
   },
 
-  // ─── Tier ───
+  // Gradient overlay for text readability
+  gradientOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  // Top row
+  topRow: {
+    position: "absolute",
+    top: SPACING.md,
+    left: SPACING.md,
+    right: SPACING.md,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    zIndex: 2,
+  },
   tierBadge: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    borderRadius: 16,
-    marginBottom: SPACING.lg,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs + 2,
+    borderRadius: 12,
   },
   tierText: {
-    fontSize: 15,
+    color: "#fff",
+    fontSize: 13,
     fontWeight: "800",
-    letterSpacing: 1.5,
+    letterSpacing: 1,
     textTransform: "uppercase",
   },
 
-  // ─── Roast ───
-  roastCard: {
-    backgroundColor: COLORS.bgElevated,
-    borderRadius: 16,
-    padding: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  // Bottom content
+  bottomContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: SPACING.lg,
+    paddingBottom: SPACING.md,
+    zIndex: 2,
   },
-  roastQuoteMark: {
-    color: COLORS.primary,
-    fontSize: 28,
+
+  // Score
+  scoreRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  score: {
+    fontSize: 64,
+    fontWeight: "900",
+    color: "#fff",
+    letterSpacing: -2,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 30,
+  },
+  scoreLabel: {
+    fontSize: 14,
     fontWeight: "700",
-    lineHeight: 30,
-    marginBottom: -4,
+    color: "rgba(255,255,255,0.6)",
+    letterSpacing: 4,
   },
-  roastText: {
-    color: COLORS.textPrimary,
-    fontSize: 15,
+
+  // Glow line separator
+  glowLine: {
+    height: 2,
+    borderRadius: 1,
+    marginBottom: SPACING.sm,
+    opacity: 0.8,
+  },
+
+  // Roast
+  roast: {
+    fontSize: 16,
+    fontWeight: "700",
     fontStyle: "italic",
+    color: "#fff",
     lineHeight: 22,
-    letterSpacing: 0.2,
-  },
-  roastQuoteMarkEnd: {
-    color: COLORS.primary,
-    fontSize: 28,
-    fontWeight: "700",
-    lineHeight: 30,
-    textAlign: "right",
-    marginTop: -2,
+    marginBottom: SPACING.sm,
   },
 
-  // ─── Personality ───
-  personalityRead: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: "center",
-    marginBottom: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-    fontWeight: "400",
-  },
-
-  // ─── Watermark ───
-  watermark: {
+  // Personality
+  personality: {
     fontSize: 12,
-    fontWeight: "300",
-    color: COLORS.textMuted,
-    letterSpacing: 3,
-    textTransform: "lowercase",
-    opacity: 0.5,
+    color: "rgba(255,255,255,0.65)",
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
   },
 
-  // ─── Actions ───
+  // Watermark
+  watermark: {
+    fontSize: 11,
+    fontWeight: "300",
+    color: "rgba(255,255,255,0.3)",
+    letterSpacing: 3,
+    textAlign: "right",
+  },
+
+  // Actions
   actions: {
     flexDirection: "row",
     gap: SPACING.md,
@@ -306,14 +307,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  actionBtnIcon: {
+  actionEmoji: {
     fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.textPrimary,
   },
-  actionBtnText: {
+  actionText: {
     color: COLORS.textPrimary,
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });
