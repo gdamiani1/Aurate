@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,11 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { COLORS, SPACING } from "../../src/constants/theme";
 import { getTierForScore } from "../../src/constants/tiers";
 import { SIGMA_PATHS } from "../../src/constants/paths";
@@ -18,14 +21,20 @@ import { authedFetch } from "../../src/lib/api";
 
 interface HistoryEntry {
   id: string;
-  score: number;
+  aura_score: number;
   roast: string;
-  thumbnail_url?: string;
+  image_url?: string;
+  tier: string;
+  is_saved: boolean;
   created_at: string;
 }
 
+type Filter = "all" | "saved";
+
 export default function YourAuraScreen() {
   const { profile } = useAuthStore();
+  const router = useRouter();
+  const [filter, setFilter] = useState<Filter>("all");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -34,24 +43,53 @@ export default function YourAuraScreen() {
     if (!profile) return;
     setLoading(true);
     try {
-      const res = await authedFetch(`/aura/history/${profile.id}`);
+      const queryString = filter === "saved" ? "?saved=true" : "";
+      const res = await authedFetch(`/aura/history/${profile.id}${queryString}`);
       const json = await res.json();
-      setHistory(json.checks ?? json.history ?? json.data ?? []);
+      setHistory(json.checks ?? []);
     } catch {
       setHistory([]);
     } finally {
       setLoading(false);
     }
-  }, [profile]);
+  }, [profile, filter]);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+  // Refetch when screen gets focus or filter changes
+  useFocusEffect(
+    useCallback(() => {
+      fetchHistory();
+    }, [fetchHistory])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchHistory();
     setRefreshing(false);
+  };
+
+  const toggleSave = async (entry: HistoryEntry) => {
+    const newSaved = !entry.is_saved;
+    // Optimistic update
+    setHistory((prev) =>
+      prev
+        .map((h) => (h.id === entry.id ? { ...h, is_saved: newSaved } : h))
+        // If we're in saved filter and unsaving, remove from list
+        .filter((h) => filter !== "saved" || h.is_saved)
+    );
+    try {
+      await authedFetch(`/aura/check/${entry.id}/save`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ saved: newSaved }),
+      });
+    } catch {
+      // Revert on error
+      fetchHistory();
+    }
+  };
+
+  const openDetail = (id: string) => {
+    router.push(`/aura/${id}` as any);
   };
 
   const tier = getTierForScore(profile?.peak_aura ?? 0);
@@ -89,8 +127,26 @@ export default function YourAuraScreen() {
         </View>
       )}
 
-      {/* History header */}
-      <Text style={styles.sectionHeader}>Aura History</Text>
+      {/* Filter tabs */}
+      <View style={styles.filterRow}>
+        <Text style={styles.sectionHeader}>Aura History</Text>
+        <View style={styles.tabs}>
+          <TouchableOpacity
+            style={[styles.tab, filter === "all" && styles.tabActive]}
+            onPress={() => setFilter("all")}
+          >
+            <Text style={[styles.tabText, filter === "all" && styles.tabTextActive]}>All</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, filter === "saved" && styles.tabActive]}
+            onPress={() => setFilter("saved")}
+          >
+            <Text style={[styles.tabText, filter === "saved" && styles.tabTextActive]}>
+              ★ Saved
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 
@@ -106,55 +162,53 @@ export default function YourAuraScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      {loading && !refreshing ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={COLORS.primary} size="large" />
-        </View>
-      ) : (
-        <FlatList
-          data={history}
-          keyExtractor={(item) => item.id}
-          ListHeaderComponent={ListHeader}
-          renderItem={({ item }) => (
-            <AuraHistoryItem
-              score={item.score}
-              roast={item.roast}
-              thumbnailUrl={item.thumbnail_url}
-              timestamp={item.created_at}
-            />
-          )}
-          contentContainerStyle={styles.list}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={COLORS.primary}
-            />
-          }
-          ListEmptyComponent={
+      <FlatList
+        data={history}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={ListHeader}
+        renderItem={({ item }) => (
+          <AuraHistoryItem
+            score={item.aura_score}
+            roast={item.roast}
+            imageUrl={item.image_url}
+            timestamp={item.created_at}
+            isSaved={item.is_saved}
+            onPress={() => openDetail(item.id)}
+            onToggleSave={() => toggleSave(item)}
+          />
+        )}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
+        }
+        ListEmptyComponent={
+          loading ? (
             <View style={styles.empty}>
-              <Text style={styles.emptyEmoji}>{"📸"}</Text>
+              <ActivityIndicator color={COLORS.primary} />
+            </View>
+          ) : (
+            <View style={styles.empty}>
+              <Text style={styles.emptyEmoji}>{filter === "saved" ? "⭐" : "📸"}</Text>
               <Text style={styles.emptyText}>
-                No aura checks yet. Go drop a pic and find out if you're HIM.
+                {filter === "saved"
+                  ? "No saved cards yet. Tap the star on any aura check to save it."
+                  : "No aura checks yet. Go drop a pic and find out if you're HIM."}
               </Text>
             </View>
-          }
-        />
-      )}
+          )
+        }
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  container: { flex: 1, backgroundColor: COLORS.bg },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   profileSection: {
     alignItems: "center",
     paddingTop: SPACING.xl,
@@ -185,10 +239,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs + 2,
     borderRadius: 8,
   },
-  tierText: {
-    fontSize: 13,
-    fontWeight: "700",
-  },
+  tierText: { fontSize: 13, fontWeight: "700" },
   pathContainer: {
     marginHorizontal: SPACING.md,
     marginTop: SPACING.lg,
@@ -210,35 +261,57 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  pathEmoji: {
-    fontSize: 22,
-    marginRight: SPACING.sm,
-  },
+  pathEmoji: { fontSize: 22, marginRight: SPACING.sm },
   pathName: {
     color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: "600",
   },
-  sectionHeader: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
-    fontWeight: "800",
+  filterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginHorizontal: SPACING.md,
     marginTop: SPACING.xl,
     marginBottom: SPACING.md,
   },
-  list: {
-    paddingBottom: SPACING.xxl,
+  sectionHeader: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: "800",
   },
+  tabs: {
+    flexDirection: "row",
+    gap: SPACING.xs,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: 10,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  tab: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  tabActive: {
+    backgroundColor: COLORS.primary,
+  },
+  tabText: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  tabTextActive: {
+    color: "#fff",
+  },
+  list: { paddingBottom: SPACING.xxl },
   empty: {
     alignItems: "center",
     marginTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
   },
-  emptyEmoji: {
-    fontSize: 48,
-    marginBottom: SPACING.md,
-  },
+  emptyEmoji: { fontSize: 48, marginBottom: SPACING.md },
   emptyText: {
     color: COLORS.textSecondary,
     fontSize: 15,

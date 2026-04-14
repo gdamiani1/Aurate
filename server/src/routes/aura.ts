@@ -102,18 +102,50 @@ export async function auraRoutes(app: FastifyInstance) {
   // Get aura history (AUTH REQUIRED, only own)
   app.get("/aura/history/:userId", { preHandler: requireAuth }, async (request: AuthedRequest, reply) => {
     const { userId } = request.params as { userId: string };
+    const { saved } = request.query as { saved?: string };
 
-    // Users can only fetch their own history
     if (userId !== request.userId) {
       return reply.status(403).send({ error: "That ain't your aura history bro." });
     }
 
-    const { data } = await supabase
+    let query = supabase
       .from("aura_checks")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(100);
+
+    if (saved === "true") {
+      query = query.eq("is_saved", true);
+    }
+
+    const { data } = await query;
     return { checks: data || [] };
+  });
+
+  // Toggle saved status on a specific check
+  app.patch("/aura/check/:checkId/save", { preHandler: requireAuth }, async (request: AuthedRequest, reply) => {
+    const { checkId } = request.params as { checkId: string };
+    const { saved } = request.body as { saved: boolean };
+
+    // Verify ownership
+    const { data: check } = await supabase
+      .from("aura_checks")
+      .select("user_id, is_saved")
+      .eq("id", checkId)
+      .single();
+
+    if (!check) return reply.status(404).send({ error: "Check not found." });
+    if (check.user_id !== request.userId) {
+      return reply.status(403).send({ error: "That ain't your check bro." });
+    }
+
+    const { error } = await supabase
+      .from("aura_checks")
+      .update({ is_saved: saved })
+      .eq("id", checkId);
+
+    if (error) return reply.status(500).send({ error: "Failed to update. Try again." });
+    return { is_saved: saved };
   });
 }
