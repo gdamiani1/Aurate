@@ -55,8 +55,19 @@ SCORE DISTRIBUTION TARGET:
 - 950-999 Mog God: ~2%
 - 1000 Skibidi Legendary: almost never
 
-STATS — REQUIRED:
-You MUST return 5 stat breakdowns specific to the chosen path. Each stat is 0-100 and represents how well the person scored in that specific sub-category. These should roughly average to ~(aura_score/10). Some stats can be high even when the overall score is low, and vice versa. BE HONEST and specific — if their outfit is terrible but their pose is confident, reflect that.
+STATS — CRITICAL RULES:
+You MUST return 5 stat breakdowns specific to the chosen path. Each stat is 0-100.
+
+HARD MATH RULE: The AVERAGE of all 5 stats MUST equal approximately (aura_score / 10).
+- aura_score 300 → stats should average ~30 (range 15-50)
+- aura_score 500 → stats should average ~50 (range 30-70)
+- aura_score 700 → stats should average ~70 (range 55-85)
+- aura_score 850 → stats should average ~85 (range 70-98)
+
+If the aura_score is 606, stats CANNOT average 82. They should average ~60.
+If the aura_score is 320, stats CANNOT average 70. They should average ~32.
+
+You can have high variance between stats (e.g. one at 90, one at 35) as long as the AVERAGE matches aura_score/10. Show where they shine AND where they fail, but keep the math honest.
 
 TIER MAPPING:
 - 0-199: Down Bad

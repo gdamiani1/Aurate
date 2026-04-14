@@ -69,5 +69,26 @@ export async function rateAura(
     score: Math.max(0, Math.min(100, Math.round(Number(s.score) || 0))),
   }));
 
+  // Normalize stats so their average matches the final aura_score / 10.
+  // This preserves the AI's relative rankings (which stat is highest/lowest)
+  // while guaranteeing the math adds up after jitter.
+  if (parsed.stats.length > 0) {
+    const targetAvg = parsed.aura_score / 10; // 0-100 scale
+    const currentAvg =
+      parsed.stats.reduce((sum, s) => sum + s.score, 0) / parsed.stats.length;
+    const delta = targetAvg - currentAvg;
+
+    // Shift + slight preservation of variance
+    parsed.stats = parsed.stats.map((s) => {
+      const shifted = s.score + delta;
+      // Add ±3 noise so stats don't look too uniform after shifting
+      const noise = Math.floor(Math.random() * 7) - 3;
+      return {
+        label: s.label,
+        score: Math.max(0, Math.min(100, Math.round(shifted + noise))),
+      };
+    });
+  }
+
   return parsed;
 }
