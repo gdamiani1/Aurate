@@ -16,6 +16,8 @@ import { COLORS, SPACING } from "../../src/constants/theme";
 import { SIGMA_PATHS } from "../../src/constants/paths";
 import { useAuthStore } from "../../src/store/authStore";
 import { supabase } from "../../src/lib/supabase";
+import { authedFetch } from "../../src/lib/api";
+import { useFocusEffect } from "@react-navigation/native";
 import AuraResultCard from "../../src/components/AuraResultCard";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
@@ -82,6 +84,7 @@ export default function VibeCheckScreen() {
   const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
   const [result, setResult] = useState<AuraResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showingLatest, setShowingLatest] = useState(false); // true = viewing saved latest, false = fresh check
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0.4)).current;
@@ -192,6 +195,7 @@ export default function VibeCheckScreen() {
     setImageUri(uri);
     setError(null);
     setResult(null);
+    setShowingLatest(false);
     submitAuraCheck(uri);
   };
 
@@ -211,6 +215,7 @@ export default function VibeCheckScreen() {
     setImageUri(uri);
     setError(null);
     setResult(null);
+    setShowingLatest(false);
     submitAuraCheck(uri);
   };
 
@@ -224,6 +229,7 @@ export default function VibeCheckScreen() {
       }
       const data = await checkAura(uri, selectedPath, session.access_token);
       setResult(data);
+      setShowingLatest(false);
     } catch (err: any) {
       setError(err.message || "Something went wrong no cap");
     } finally {
@@ -236,7 +242,41 @@ export default function VibeCheckScreen() {
     setResult(null);
     setError(null);
     setLoading(false);
+    setShowingLatest(false);
   };
+
+  // Fetch the latest aura check from history and display it
+  const fetchLatest = async () => {
+    if (!profile?.id) return;
+    try {
+      const res = await authedFetch(`/aura/history/${profile.id}`);
+      const json = await res.json();
+      const latest = (json.checks || [])[0];
+      if (latest) {
+        setResult({
+          aura_score: latest.aura_score,
+          personality_read: latest.personality_read,
+          roast: latest.roast,
+          aura_color: latest.aura_color,
+          tier: latest.tier,
+        });
+        setImageUri(latest.image_url);
+        setShowingLatest(true);
+      }
+    } catch {
+      // Silent fail — just show empty state
+    }
+  };
+
+  // Load latest on mount + whenever screen is focused (only if nothing fresh)
+  useFocusEffect(
+    React.useCallback(() => {
+      // Don't override a fresh result the user is looking at
+      if (!result || showingLatest) {
+        fetchLatest();
+      }
+    }, [profile?.id])
+  );
 
   const handlePathSelect = (pathId: string) => {
     setSelectedPath(pathId);
@@ -247,17 +287,46 @@ export default function VibeCheckScreen() {
   if (result && !loading) {
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
-        <ScrollView contentContainerStyle={styles.resultScroll}>
+        <ScrollView
+          contentContainerStyle={styles.resultScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          {showingLatest && (
+            <View style={styles.latestBanner}>
+              <Text style={styles.latestBannerText}>YOUR LATEST AURA</Text>
+            </View>
+          )}
           <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
             <AuraResultCard result={result} imageUri={imageUri} />
           </Animated.View>
           <TouchableOpacity
-            style={styles.tryAgainBtn}
-            onPress={handleReset}
-            activeOpacity={0.8}
+            style={styles.newCheckBtn}
+            onPress={() => {
+              setResult(null);
+              setImageUri(null);
+              setShowingLatest(false);
+              pickImage();
+            }}
+            activeOpacity={0.85}
           >
-            <Text style={styles.tryAgainText}>Check Again</Text>
+            <LinearGradient
+              colors={[COLORS.primary, "#6D28D9"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.newCheckGradient}
+            >
+              <Text style={styles.newCheckText}>+ New Aura Check</Text>
+            </LinearGradient>
           </TouchableOpacity>
+          {showingLatest && (
+            <TouchableOpacity
+              style={styles.dismissBtn}
+              onPress={handleReset}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.dismissText}>Dismiss</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </SafeAreaView>
     );
@@ -575,20 +644,49 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 
-  // ─── Try again ───
-  tryAgainBtn: {
+  // ─── Latest banner ───
+  latestBanner: {
     alignSelf: "center",
-    backgroundColor: COLORS.bgElevated,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    borderRadius: 20,
-    marginTop: SPACING.lg,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs + 2,
+    borderRadius: 8,
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.primary + "20",
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.primary + "40",
   },
-  tryAgainText: {
-    color: COLORS.textSecondary,
-    fontSize: 15,
-    fontWeight: "600",
+  latestBannerText: {
+    color: COLORS.primary,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 2,
+  },
+
+  // ─── New check CTA ───
+  newCheckBtn: {
+    alignSelf: "stretch",
+    marginTop: SPACING.xl,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  newCheckGradient: {
+    paddingVertical: SPACING.md + 2,
+    alignItems: "center",
+  },
+  newCheckText: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+  },
+  dismissBtn: {
+    alignSelf: "center",
+    marginTop: SPACING.md,
+    padding: SPACING.sm,
+  },
+  dismissText: {
+    color: COLORS.textMuted,
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
