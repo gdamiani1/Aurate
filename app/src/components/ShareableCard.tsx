@@ -35,7 +35,7 @@ const ShareableCard = forwardRef<View, ShareableCardProps>(
           </View>
 
           <View style={styles.watermark}>
-            <Text style={styles.watermarkText}>aurate</Text>
+            <Text style={styles.watermarkText}>mogster</Text>
           </View>
         </LinearGradient>
       </View>

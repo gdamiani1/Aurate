@@ -1,34 +1,35 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "Mogster",
+    "slug": "mogster",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "app",
+    "scheme": "mogster",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0A0A0F"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gdamiani.app",
+      "bundleIdentifier": "com.gdamiani.mogster",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true,
           "NSAllowsArbitraryLoads": true
         },
-        "NSPhotoLibraryAddUsageDescription": "Save your aura card to camera roll",
-        "NSPhotoLibraryUsageDescription": "Save your aura card to camera roll"
+        "NSPhotoLibraryAddUsageDescription": "Save your Mogster cards to camera roll",
+        "NSPhotoLibraryUsageDescription": "Save your Mogster cards to camera roll"
       }
     },
     "android": {
+      "package": "com.gdamiani.mogster",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0A0A0F"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -44,8 +45,8 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow Aurate to save your aura cards to camera roll",
-          "savePhotosPermission": "Allow Aurate to save your aura cards to camera roll"
+          "photosPermission": "Allow Mogster to save your cards to camera roll",
+          "savePhotosPermission": "Allow Mogster to save your cards to camera roll"
         }
       ],
       [

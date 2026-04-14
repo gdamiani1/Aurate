@@ -29,7 +29,7 @@ function WelcomeScreen() {
   return (
     <View style={[styles.page, styles.center]}>
       <Text style={styles.bigEmoji}>{"🌀"}</Text>
-      <Text style={styles.title}>Welcome to Aurate</Text>
+      <Text style={styles.title}>Welcome to Mogster</Text>
       <Text style={styles.body}>
         The AI rates your aura.{"\n"}Are you HIM or are you mid?
       </Text>

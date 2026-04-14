@@ -55,7 +55,7 @@ export default function AuraResultCard({
       const uri = await viewShotRef.current.capture();
       await Share.share({
         url: uri,
-        message: `I scored ${result.aura_score} aura (${result.tier}) on Aurate\n\n"${result.roast}"`,
+        message: `I scored ${result.aura_score} aura (${result.tier}) on Mogster\n\n"${result.roast}"`,
       });
     } catch (_) {}
   };
@@ -150,7 +150,7 @@ export default function AuraResultCard({
             )}
 
             {/* Watermark */}
-            <Text style={styles.watermark}>aurate</Text>
+            <Text style={styles.watermark}>mogster</Text>
           </View>
         </View>
       </ViewShot>

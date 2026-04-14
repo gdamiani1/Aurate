@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ONBOARDING_KEY = "aurate_onboarding_complete";
+const ONBOARDING_KEY = "mogster_onboarding_complete";
 
 interface Profile {
   id: string;

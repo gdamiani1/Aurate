@@ -16,8 +16,8 @@ const app = Fastify({
 
 // CORS: only allow our app domains + local dev
 const ALLOWED_ORIGINS = [
-  "https://aurate.app",
-  "https://www.aurate.app",
+  "https://mogster.app",
+  "https://www.mogster.app",
   // Expo dev
   /^http:\/\/localhost(:\d+)?$/,
   /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/,
@@ -48,7 +48,7 @@ app.register(dailyRoutes);
 const start = async () => {
   try {
     await app.listen({ port: Number(process.env.PORT) || 3000, host: "0.0.0.0" });
-    console.log("Aurate API is live fr fr");
+    console.log("Mogster API is live fr fr");
   } catch (err) {
     app.log.error(err);
     process.exit(1);

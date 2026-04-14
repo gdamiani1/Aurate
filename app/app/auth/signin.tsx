@@ -65,7 +65,7 @@ export default function SignInScreen() {
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
-            placeholder="sigma@aurate.app"
+            placeholder="sigma@mogster.app"
             placeholderTextColor={COLORS.textMuted}
             value={email}
             onChangeText={setEmail}
