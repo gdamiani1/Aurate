@@ -13,8 +13,7 @@ import { COLORS, SPACING } from "../../src/constants/theme";
 import { SIGMA_PATHS, SigmaPathId } from "../../src/constants/paths";
 import { useAuthStore } from "../../src/store/authStore";
 import LeaderboardRow from "../../src/components/LeaderboardRow";
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+import { authedFetch } from "../../src/lib/api";
 
 type Tab = "global" | "path" | "circle";
 
@@ -37,11 +36,11 @@ export default function MogBoardScreen() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      let url = `${API_URL}/mogboard/global`;
-      if (tab === "path") url = `${API_URL}/mogboard/path/${selectedPath}`;
-      if (tab === "circle" && profile) url = `${API_URL}/mogboard/circle/${profile.id}`;
+      let path = `/mogboard/global`;
+      if (tab === "path") path = `/mogboard/path/${selectedPath}`;
+      if (tab === "circle" && profile) path = `/mogboard/circle/${profile.id}`;
 
-      const res = await fetch(url);
+      const res = await authedFetch(path);
       const json = await res.json();
       setData(json.leaderboard ?? json.data ?? json ?? []);
     } catch {

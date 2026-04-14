@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, SPACING } from "../../src/constants/theme";
 import { SIGMA_PATHS } from "../../src/constants/paths";
 import { useAuthStore } from "../../src/store/authStore";
+import { supabase } from "../../src/lib/supabase";
 import AuraResultCard from "../../src/components/AuraResultCard";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
@@ -41,7 +42,7 @@ interface AuraResult {
 async function checkAura(
   imageUri: string,
   sigmaPath: string,
-  userId: string
+  token: string
 ): Promise<AuraResult> {
   const fileName = imageUri.split("/").pop() || "photo.jpg";
   const fileType = fileName.endsWith(".png") ? "image/png" : "image/jpeg";
@@ -57,7 +58,7 @@ async function checkAura(
     method: "POST",
     headers: {
       "x-sigma-path": sigmaPath,
-      "x-user-id": userId,
+      "Authorization": `Bearer ${token}`,
       "Content-Type": "multipart/form-data",
     },
     body: formData,
@@ -217,8 +218,11 @@ export default function VibeCheckScreen() {
     setLoading(true);
     setLoadingMsgIndex(0);
     try {
-      const userId = profile?.id || "anonymous";
-      const data = await checkAura(uri, selectedPath, userId);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Not signed in. Sign in again fr.");
+      }
+      const data = await checkAura(uri, selectedPath, session.access_token);
       setResult(data);
     } catch (err: any) {
       setError(err.message || "Something went wrong no cap");

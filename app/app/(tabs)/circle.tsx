@@ -14,8 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SPACING } from "../../src/constants/theme";
 import { getTierForScore } from "../../src/constants/tiers";
 import { useAuthStore } from "../../src/store/authStore";
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+import { authedFetch } from "../../src/lib/api";
 
 interface Friend {
   id: string;
@@ -48,13 +47,13 @@ export default function CircleScreen() {
     setLoading(true);
     try {
       const [circleRes, pendingRes] = await Promise.all([
-        fetch(`${API_URL}/circle/${profile.id}`),
-        fetch(`${API_URL}/circle/pending/${profile.id}`),
+        authedFetch(`/circle/${profile.id}`),
+        authedFetch(`/circle/pending/${profile.id}`),
       ]);
       const circleJson = await circleRes.json();
       const pendingJson = await pendingRes.json();
-      setFriends(circleJson.circle ?? circleJson.data ?? circleJson ?? []);
-      setPending(pendingJson.pending ?? pendingJson.data ?? pendingJson ?? []);
+      setFriends(circleJson.circle ?? circleJson.data ?? []);
+      setPending(pendingJson.pending ?? pendingJson.data ?? []);
     } catch {
       setFriends([]);
       setPending([]);
@@ -77,12 +76,11 @@ export default function CircleScreen() {
     if (!searchText.trim() || !profile) return;
     setLinking(true);
     try {
-      const res = await fetch(`${API_URL}/circle/link`, {
+      const res = await authedFetch(`/circle/link`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          from_user_id: profile.id,
-          to_username: searchText.trim(),
+          addressee_username: searchText.trim(),
         }),
       });
       const json = await res.json();
@@ -99,15 +97,14 @@ export default function CircleScreen() {
     }
   };
 
-  const handleRespond = async (requestId: string, action: "accept" | "block") => {
+  const handleRespond = async (requestId: string, action: "accepted" | "blocked") => {
     if (!profile) return;
     try {
-      await fetch(`${API_URL}/circle/respond`, {
-        method: "POST",
+      await authedFetch(`/circle/respond`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          request_id: requestId,
-          user_id: profile.id,
+          friendship_id: requestId,
           action,
         }),
       });
@@ -149,13 +146,13 @@ export default function CircleScreen() {
       </Text>
       <TouchableOpacity
         style={styles.acceptBtn}
-        onPress={() => handleRespond(item.id, "accept")}
+        onPress={() => handleRespond(item.id, "accepted")}
       >
         <Text style={styles.acceptText}>Accept</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.blockBtn}
-        onPress={() => handleRespond(item.id, "block")}
+        onPress={() => handleRespond(item.id, "blocked")}
       >
         <Text style={styles.blockText}>Block</Text>
       </TouchableOpacity>

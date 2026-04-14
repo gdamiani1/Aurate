@@ -9,9 +9,33 @@ import { leaderboardRoutes } from "./routes/leaderboard";
 import { friendRoutes } from "./routes/friends";
 import { dailyRoutes } from "./routes/daily";
 
-const app = Fastify({ logger: true });
+const app = Fastify({
+  logger: true,
+  bodyLimit: 11 * 1024 * 1024, // 11MB — slightly above our 10MB file limit
+});
 
-app.register(cors, { origin: true });
+// CORS: only allow our app domains + local dev
+const ALLOWED_ORIGINS = [
+  "https://aurate.app",
+  "https://www.aurate.app",
+  // Expo dev
+  /^http:\/\/localhost(:\d+)?$/,
+  /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/,
+  /^http:\/\/172\.\d+\.\d+\.\d+(:\d+)?$/,
+  /^http:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/,
+];
+
+app.register(cors, {
+  origin: (origin, cb) => {
+    // No origin = mobile app (React Native). Allow.
+    if (!origin) return cb(null, true);
+    const allowed = ALLOWED_ORIGINS.some((o) =>
+      typeof o === "string" ? o === origin : o.test(origin)
+    );
+    cb(null, allowed);
+  },
+  credentials: true,
+});
 
 app.get("/health", async () => ({ status: "cooking", aura: "immaculate" }));
 

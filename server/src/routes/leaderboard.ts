@@ -1,10 +1,11 @@
 import { FastifyInstance } from "fastify";
 import { redis, LEADERBOARD_KEYS } from "../lib/redis";
 import { supabase } from "../lib/supabase";
+import { requireAuth } from "../middleware/auth";
 
 export async function leaderboardRoutes(app: FastifyInstance) {
   // Global Mog Board
-  app.get("/mogboard/global", async (request) => {
+  app.get("/mogboard/global", { preHandler: requireAuth }, async (request) => {
     const { limit = "50", offset = "0" } = request.query as {
       limit?: string;
       offset?: string;
@@ -44,7 +45,7 @@ export async function leaderboardRoutes(app: FastifyInstance) {
   });
 
   // Path-specific Mog Board
-  app.get("/mogboard/path/:path", async (request) => {
+  app.get("/mogboard/path/:path", { preHandler: requireAuth }, async (request) => {
     const { path } = request.params as { path: string };
     const { limit = "50" } = request.query as { limit?: string };
 
@@ -77,7 +78,7 @@ export async function leaderboardRoutes(app: FastifyInstance) {
   });
 
   // Friends Mog Board
-  app.get("/mogboard/circle/:userId", async (request) => {
+  app.get("/mogboard/circle/:userId", { preHandler: requireAuth }, async (request) => {
     const { userId } = request.params as { userId: string };
     const { data: friendships } = await supabase
       .from("friendships")

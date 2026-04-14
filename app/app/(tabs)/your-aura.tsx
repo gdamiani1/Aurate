@@ -14,8 +14,7 @@ import { SIGMA_PATHS } from "../../src/constants/paths";
 import { useAuthStore } from "../../src/store/authStore";
 import StatsBar from "../../src/components/StatsBar";
 import AuraHistoryItem from "../../src/components/AuraHistoryItem";
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+import { authedFetch } from "../../src/lib/api";
 
 interface HistoryEntry {
   id: string;
@@ -35,9 +34,9 @@ export default function YourAuraScreen() {
     if (!profile) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/aura/history/${profile.id}`);
+      const res = await authedFetch(`/aura/history/${profile.id}`);
       const json = await res.json();
-      setHistory(json.history ?? json.data ?? json ?? []);
+      setHistory(json.checks ?? json.history ?? json.data ?? []);
     } catch {
       setHistory([]);
     } finally {
