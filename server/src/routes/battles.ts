@@ -277,4 +277,81 @@ export async function battleRoutes(app: FastifyInstance) {
       opponent_check: oppCheck,
     };
   });
+
+  // ─── Active battles for current user ───
+  app.get("/battles/active", { preHandler: requireAuth }, async (request: AuthedRequest) => {
+    const userId = request.userId!;
+
+    // Auto-expire stale battles first (cheap side-effect)
+    await supabase
+      .from("battles")
+      .update({ status: "expired" })
+      .eq("status", "awaiting_opponent")
+      .lt("expires_at", new Date().toISOString());
+
+    const { data } = await supabase
+      .from("battles")
+      .select(`
+        id, challenger_id, opponent_id, sigma_path, expires_at, created_at,
+        challenger:profiles!battles_challenger_id_fkey(id, username, battle_wins, battle_losses),
+        opponent:profiles!battles_opponent_id_fkey(id, username, battle_wins, battle_losses)
+      `)
+      .or(`challenger_id.eq.${userId},opponent_id.eq.${userId}`)
+      .eq("status", "awaiting_opponent")
+      .order("created_at", { ascending: false });
+
+    return { battles: data || [] };
+  });
+
+  // ─── Battle history ───
+  app.get("/battles/history", { preHandler: requireAuth }, async (request: AuthedRequest) => {
+    const userId = request.userId!;
+    const { data } = await supabase
+      .from("battles")
+      .select(`
+        id, challenger_id, opponent_id, winner_id, margin, sigma_path,
+        narrative, completed_at,
+        challenger:profiles!battles_challenger_id_fkey(id, username),
+        opponent:profiles!battles_opponent_id_fkey(id, username)
+      `)
+      .or(`challenger_id.eq.${userId},opponent_id.eq.${userId}`)
+      .eq("status", "completed")
+      .order("completed_at", { ascending: false })
+      .limit(50);
+    return { battles: data || [] };
+  });
+
+  // ─── Battle detail ───
+  app.get("/battles/:battleId", { preHandler: requireAuth }, async (request: AuthedRequest, reply) => {
+    const { battleId } = request.params as { battleId: string };
+    const userId = request.userId!;
+    const { data: battle } = await supabase
+      .from("battles")
+      .select(`
+        *,
+        challenger:profiles!battles_challenger_id_fkey(id, username, battle_wins, battle_losses, battle_streak),
+        opponent:profiles!battles_opponent_id_fkey(id, username, battle_wins, battle_losses, battle_streak),
+        challenger_check:aura_checks!battles_challenger_check_id_fkey(*),
+        opponent_check:aura_checks!battles_opponent_check_id_fkey(*)
+      `)
+      .eq("id", battleId)
+      .single();
+    if (!battle) return reply.status(404).send({ error: "Battle not found" });
+    if (battle.challenger_id !== userId && battle.opponent_id !== userId) {
+      return reply.status(403).send({ error: "Not your battle to view" });
+    }
+    return { battle };
+  });
+
+  // ─── Decline ───
+  app.post("/battles/:battleId/decline", { preHandler: requireAuth }, async (request: AuthedRequest, reply) => {
+    const { battleId } = request.params as { battleId: string };
+    const userId = request.userId!;
+    const { data: battle } = await supabase.from("battles").select("opponent_id, status").eq("id", battleId).single();
+    if (!battle) return reply.status(404).send({ error: "Not found" });
+    if (battle.opponent_id !== userId) return reply.status(403).send({ error: "Not your battle" });
+    if (battle.status !== "awaiting_opponent") return reply.status(409).send({ error: "Already resolved" });
+    await supabase.from("battles").update({ status: "cancelled" }).eq("id", battleId);
+    return { ok: true };
+  });
 }
