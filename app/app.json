@@ -20,7 +20,8 @@
         "NSPhotoLibraryAddUsageDescription": "Save your Mogster cards to camera roll",
         "NSPhotoLibraryUsageDescription": "Save your Mogster cards to camera roll",
         "NSCameraUsageDescription": "Take photos to get your mog rated",
-        "NSMicrophoneUsageDescription": "Capture videos for your aura check"
+        "NSMicrophoneUsageDescription": "Capture videos for your aura check",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
