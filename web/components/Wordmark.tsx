@@ -21,7 +21,7 @@ export default function Wordmark({ size = 'lg', className }: WordmarkProps) {
         className ? ` ${className}` : ''
       }`}
     >
-      MOGSTER<span className="text-hazard-yellow">.</span>
+      MOGSTER<span>.</span>
     </span>
   );
 }

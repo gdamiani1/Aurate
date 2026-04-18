@@ -1,18 +1,31 @@
 import HazardStripe from '@/components/HazardStripe';
 import GrainOverlay from '@/components/GrainOverlay';
-import Wordmark from '@/components/Wordmark';
+import GlitchWordmark from '@/components/GlitchWordmark';
+import MarqueeStripe from '@/components/MarqueeStripe';
+import AuraReadouts from '@/components/AuraReadouts';
+import AuraBlob from '@/components/AuraBlob';
 import { WaitlistForm } from '@/components/WaitlistForm';
+
+const MARQUEE_ITEMS = [
+  'AURA MEASUREMENT STATION',
+  'CALIBRATING',
+  'SIGMA DETECTED',
+  'NO CAP VERIFIED',
+  'MOG LEVEL CRITICAL',
+];
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-hazard-yellow flex flex-col">
+    <main className="relative min-h-screen bg-hazard-yellow flex flex-col overflow-hidden">
       <GrainOverlay />
+      <AuraReadouts />
+      <AuraBlob />
 
-      <HazardStripe label="⚠ AURA MEASUREMENT STATION ⚠" height="md" />
+      <MarqueeStripe items={MARQUEE_ITEMS} ariaLabel="Aura measurement station: calibrating" />
 
       <div className="relative z-10 flex-1 px-6 pt-16 pb-12 md:pt-24">
         <div className="mx-auto w-full max-w-2xl">
-          <Wordmark size="lg" className="block text-center" />
+          <GlitchWordmark className="block text-center" />
 
           <h1 className="mt-10 font-display text-5xl md:text-6xl text-ink text-center tracking-tight leading-tight">
             <span className="block">YOUR AURA.</span>

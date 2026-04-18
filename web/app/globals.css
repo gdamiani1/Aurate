@@ -9,3 +9,116 @@
   --font-mono: var(--font-jbmono);
   --font-body: var(--font-inter);
 }
+
+/* ---------- Motion: marquee ticker ---------- */
+@keyframes mogster-marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.mogster-marquee-track {
+  animation: mogster-marquee-scroll 40s linear infinite;
+  will-change: transform;
+}
+
+/* ---------- Motion: drifting aura readouts ---------- */
+/* Each readout gets an offset via CSS vars, so one keyframe covers all six. */
+@keyframes mogster-aura-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(var(--mogster-drift-x, 120px), var(--mogster-drift-y, 80px)); }
+}
+.mogster-aura-readout {
+  animation: mogster-aura-drift var(--mogster-drift-duration, 140s) ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Last-digit flicker: three stacked spans fade in sequence. */
+@keyframes mogster-flicker-a { 0%, 100% { opacity: 1; } 33%, 66% { opacity: 0; } }
+@keyframes mogster-flicker-b { 0%, 33% { opacity: 0; } 34%, 66% { opacity: 1; } 67%, 100% { opacity: 0; } }
+@keyframes mogster-flicker-c { 0%, 66% { opacity: 0; } 67%, 100% { opacity: 1; } }
+.mogster-flicker > span:nth-child(1) { animation: mogster-flicker-a 1.8s steps(1, end) infinite; }
+.mogster-flicker > span:nth-child(2) { animation: mogster-flicker-b 1.8s steps(1, end) infinite; }
+.mogster-flicker > span:nth-child(3) { animation: mogster-flicker-c 1.8s steps(1, end) infinite; }
+
+/* ---------- Motion: cursor-follow aura blob ---------- */
+.mogster-blob {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-hazard-yellow) 0%, transparent 70%);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0;
+  transform: translate(calc(var(--mogster-blob-x, -9999px) - 100px), calc(var(--mogster-blob-y, -9999px) - 100px));
+  transition: transform 120ms ease-out, opacity 300ms ease-out;
+}
+.mogster-blob[data-visible="true"] { opacity: 0.85; }
+@media (hover: none), (pointer: coarse) {
+  .mogster-blob { display: none; }
+}
+
+/* ---------- Motion: glitch-settle wordmark entrance ---------- */
+.mogster-glitch {
+  position: relative;
+  display: inline-block;
+  animation: mogster-glitch-settle 1200ms cubic-bezier(0.22, 1, 0.36, 1) 1 both;
+}
+.mogster-glitch::before,
+.mogster-glitch::after {
+  /* Alt-text `/ ""` hides pseudo content from the accessibility tree. */
+  content: attr(data-text) / "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: inherit;
+}
+.mogster-glitch::before {
+  color: #00E5FF;
+  mix-blend-mode: screen;
+  animation: mogster-glitch-cyan 1000ms steps(10, end) 1 both;
+}
+.mogster-glitch::after {
+  color: #FF007A;
+  mix-blend-mode: screen;
+  animation: mogster-glitch-magenta 1000ms steps(10, end) 1 both;
+}
+@keyframes mogster-glitch-settle {
+  0%   { transform: skewX(-2deg); }
+  25%  { transform: skewX(3deg); }
+  50%  { transform: skewX(-1deg); }
+  75%  { transform: scale(1.02); }
+  100% { transform: none; }
+}
+@keyframes mogster-glitch-cyan {
+  0%   { transform: translate(-6px, 1px); opacity: 1; }
+  40%  { transform: translate(-4px, -2px); opacity: 1; }
+  70%  { transform: translate(-2px, 0); opacity: 0.6; }
+  100% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes mogster-glitch-magenta {
+  0%   { transform: translate(6px, -1px); opacity: 1; }
+  40%  { transform: translate(4px, 2px); opacity: 1; }
+  70%  { transform: translate(2px, 0); opacity: 0.6; }
+  100% { transform: translate(0, 0); opacity: 0; }
+}
+
+/* ---------- Reduced-motion: kill everything ambient ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .mogster-marquee-track,
+  .mogster-aura-readout,
+  .mogster-flicker > span {
+    animation: none;
+  }
+  .mogster-marquee-track { transform: none; }
+  .mogster-flicker > span:nth-child(1) { opacity: 1; }
+  .mogster-flicker > span:nth-child(n+2) { display: none; }
+  .mogster-glitch,
+  .mogster-glitch::before,
+  .mogster-glitch::after { animation: none; }
+  .mogster-glitch::before,
+  .mogster-glitch::after { display: none; }
+  .mogster-blob { display: none; }
+}
