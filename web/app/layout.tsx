@@ -6,9 +6,33 @@ const anton = Anton({ weight: '400', subsets: ['latin'], variable: '--font-anton
 const jbmono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jbmono', display: 'swap' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
+const SITE_URL = 'https://www.mogster.app';
+const SITE_TITLE = 'Mogster — Your Aura. Rated. No Cap.';
+const SITE_DESCRIPTION = 'AI rates your aura. Chat roasts you. Join the waitlist.';
+
 export const metadata: Metadata = {
-  title: 'Mogster — Your Aura. Rated. No Cap.',
-  description: 'AI rates your aura. Chat roasts you. Join the waitlist.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: '%s | Mogster',
+  },
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Mogster',
+    url: SITE_URL,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

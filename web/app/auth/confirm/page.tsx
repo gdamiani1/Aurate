@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import ConfirmClient from './ConfirmClient';
 
 export const metadata: Metadata = {
-  title: 'Confirming... | Mogster',
+  title: 'Confirming...',
+  robots: { index: false, follow: false },
 };
 
 export default function ConfirmPage() {

@@ -3,9 +3,10 @@ import HazardStripe from '@/components/HazardStripe';
 import GrainOverlay from '@/components/GrainOverlay';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Mogster',
+  title: 'Privacy Policy',
   description:
     'How Mogster collects, uses, and protects your data. GDPR and CCPA covered.',
+  alternates: { canonical: '/privacy' },
 };
 
 export default function PrivacyPage() {

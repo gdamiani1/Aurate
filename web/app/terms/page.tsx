@@ -3,8 +3,9 @@ import HazardStripe from '@/components/HazardStripe';
 import GrainOverlay from '@/components/GrainOverlay';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Mogster',
-  description: 'The rules for using Mogster.',
+  title: 'Terms of Service',
+  description: 'The rules for using Mogster. Acceptable use, liability, governing law.',
+  alternates: { canonical: '/terms' },
 };
 
 export default function TermsPage() {
