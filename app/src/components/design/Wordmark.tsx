@@ -12,37 +12,22 @@ interface Props {
  * Replaces the 🌀 emoji as the brand mark.
  */
 export default function Wordmark({ size = 42, style }: Props) {
+  const base = {
+    fontFamily: FONTS.display,
+    fontSize: size,
+    lineHeight: Math.round(size * 1.15),
+    includeFontPadding: false as const,
+    paddingTop: Math.round(size * 0.12),
+    letterSpacing: -size * 0.02,
+  };
   return (
     <View style={styles.row}>
-      <Text
-        style={[
-          {
-            fontFamily: FONTS.display,
-            fontSize: size,
-            lineHeight: size * 0.85,
-            color: COLORS.textPrimary,
-            letterSpacing: -size * 0.02,
-          },
-          style,
-        ]}
-      >
-        MOGSTER
-      </Text>
-      <Text
-        style={{
-          fontFamily: FONTS.display,
-          fontSize: size,
-          lineHeight: size * 0.85,
-          color: COLORS.primary,
-          letterSpacing: -size * 0.02,
-        }}
-      >
-        .
-      </Text>
+      <Text style={[{ ...base, color: COLORS.textPrimary }, style]}>MOGSTER</Text>
+      <Text style={{ ...base, color: COLORS.primary }}>.</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "baseline" },
+  row: { flexDirection: "row", alignItems: "flex-start" },
 });

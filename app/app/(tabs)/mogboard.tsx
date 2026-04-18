@@ -257,7 +257,9 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: FONTS.display,
     fontSize: 64,
-    lineHeight: 56,
+    lineHeight: 74,
+    includeFontPadding: false,
+    paddingTop: 8,
     color: COLORS.textPrimary,
     letterSpacing: -2,
     marginBottom: 8,
@@ -403,7 +405,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: COLORS.textPrimary,
     letterSpacing: -0.5,
-    lineHeight: 22,
+    lineHeight: 24,
+    includeFontPadding: false,
+    paddingTop: 3,
   },
   tier: {
     fontFamily: FONTS.monoBold,
@@ -414,6 +418,8 @@ const styles = StyleSheet.create({
   score: {
     fontFamily: FONTS.display,
     fontSize: 32,
+    lineHeight: 38,
+    paddingTop: 4,
     letterSpacing: -1.5,
     minWidth: 72,
     textAlign: "right",

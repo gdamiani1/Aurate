@@ -48,5 +48,23 @@ export const FONTS = {
   monoBold: "JetBrainsMono_700Bold",        // emphasized mono
 };
 
+/**
+ * Anton has a very tall ascent box — text gets top-clipped if lineHeight
+ * is too tight. Use this helper for any Anton Text to get consistent safe
+ * metrics. Pass the font size; it returns {fontFamily, fontSize, lineHeight,
+ * includeFontPadding, paddingTop}. letterSpacing is still up to the caller.
+ *
+ * Rule of thumb: lineHeight = fontSize * 1.15, paddingTop = fontSize * 0.12.
+ */
+export function displayText(size: number) {
+  return {
+    fontFamily: FONTS.display,
+    fontSize: size,
+    lineHeight: Math.round(size * 1.15),
+    includeFontPadding: false as const,
+    paddingTop: Math.round(size * 0.12),
+  };
+}
+
 // SVG noise data URI for React Native backgrounds
 export const GRAIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.5"/></svg>`;

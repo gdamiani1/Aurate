@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mogster",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -17,10 +17,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.gdamiani.mogster",
       "infoPlist": {
-        "NSPhotoLibraryAddUsageDescription": "Save your Mogster cards to camera roll",
-        "NSPhotoLibraryUsageDescription": "Save your Mogster cards to camera roll",
-        "NSCameraUsageDescription": "Take photos to get your mog rated",
-        "NSMicrophoneUsageDescription": "Capture videos for your aura check",
+        "NSPhotoLibraryUsageDescription": "Pick a photo from your library to get your aura rated",
+        "NSCameraUsageDescription": "Take a photo to get your aura rated",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -54,13 +52,6 @@
         {
           "photosPermission": "Allow Mogster to save your cards to camera roll",
           "savePhotosPermission": "Allow Mogster to save your cards to camera roll"
-        }
-      ],
-      [
-        "react-native-google-mobile-ads",
-        {
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
         }
       ]
     ],

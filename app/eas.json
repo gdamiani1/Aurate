@@ -8,7 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "simulator": true
+        "resourceClass": "m-medium"
       }
     },
     "preview": {
@@ -28,7 +28,7 @@
     "production": {
       "ios": {
         "appleId": "damianigrgur@gmail.com",
-        "ascAppId": "REPLACE_AFTER_APPSTORE_CONNECT_SETUP"
+        "ascAppId": "6762267520"
       }
     }
   }

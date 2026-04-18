@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,8 @@ import {
   Dimensions,
   FlatList,
   ViewToken,
+  Animated,
 } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "../../src/constants/theme";
 import { SIGMA_PATHS } from "../../src/constants/paths";
@@ -104,14 +98,11 @@ export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
 
-  const progress = useSharedValue(0);
-
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       if (viewableItems.length > 0 && viewableItems[0].index != null) {
         const idx = viewableItems[0].index;
         setCurrentIndex(idx);
-        progress.value = withTiming(idx, { duration: 300 });
       }
     }
   ).current;
@@ -141,20 +132,11 @@ export default function OnboardingScreen() {
     { key: "launch" },
   ];
 
-  /* Dot indicator animated styles */
-  const dot0Style = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1, 2], [1, 0.3, 0.3], Extrapolation.CLAMP),
-    transform: [{ scale: interpolate(progress.value, [0, 1, 2], [1.3, 1, 1], Extrapolation.CLAMP) }],
-  }));
-  const dot1Style = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1, 2], [0.3, 1, 0.3], Extrapolation.CLAMP),
-    transform: [{ scale: interpolate(progress.value, [0, 1, 2], [1, 1.3, 1], Extrapolation.CLAMP) }],
-  }));
-  const dot2Style = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1, 2], [0.3, 0.3, 1], Extrapolation.CLAMP),
-    transform: [{ scale: interpolate(progress.value, [0, 1, 2], [1, 1, 1.3], Extrapolation.CLAMP) }],
-  }));
-  const dotStyles = [dot0Style, dot1Style, dot2Style];
+  /* Dot indicator static styles based on currentIndex */
+  const dotStyleFor = (i: number) => ({
+    opacity: i === currentIndex ? 1 : 0.3,
+    transform: [{ scale: i === currentIndex ? 1.3 : 1 }],
+  });
 
   return (
     <View style={styles.container}>
@@ -182,8 +164,8 @@ export default function OnboardingScreen() {
 
       {/* Dots */}
       <View style={styles.dotsRow}>
-        {dotStyles.map((ds, i) => (
-          <Animated.View key={i} style={[styles.dot, ds]} />
+        {[0, 1, 2].map((i) => (
+          <View key={i} style={[styles.dot, dotStyleFor(i)]} />
         ))}
       </View>
 

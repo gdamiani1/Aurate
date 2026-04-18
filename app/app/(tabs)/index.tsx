@@ -22,7 +22,7 @@ import { useNavigation } from "expo-router";
 import AuraResultCard from "../../src/components/AuraResultCard";
 import Wordmark from "../../src/components/design/Wordmark";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+import { API_URL } from "../../src/lib/api";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const LOADING_MESSAGES = [
@@ -312,21 +312,19 @@ export default function VibeCheckScreen() {
   );
 
   // Listen for tab press — when user taps Vibe Check while already on it AND
-  // a result is showing, reset and open the picker for a fresh check
+  // a result is showing, reset to the home pick-lens view. Do NOT auto-open
+  // anything; user explicitly taps GET COOKED to start a new check.
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   useEffect(() => {
-    const unsubscribe = (navigation as any).addListener("tabPress", (e: any) => {
+    const unsubscribe = (navigation as any).addListener("tabPress", () => {
       if (isFocused && (result || imageUri)) {
-        e.preventDefault?.();
         setResult(null);
         setImageUri(null);
         setShowingLatest(false);
         setLatestCheckId(null);
         setLatestIsSaved(false);
         setError(null);
-        // Open picker after state has cleared
-        setTimeout(() => pickImage(), 50);
       }
     });
     return unsubscribe;
@@ -424,55 +422,64 @@ export default function VibeCheckScreen() {
           <Text style={styles.eyebrow}>01 / PICK YOUR LENS</Text>
         </View>
 
-        {/* Path grid — 2 cols, numbered, editorial */}
-        <View style={styles.pathGrid}>
+        {/* Path chips — horizontal scroll, single row */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.pathChipsScroll}
+          contentContainerStyle={styles.pathChipsRow}
+        >
           {SIGMA_PATHS.map((path, idx) => {
             const isSelected = path.id === selectedPath;
             return (
               <TouchableOpacity
                 key={path.id}
-                style={[styles.pathTile, isSelected && styles.pathTileActive]}
+                style={[styles.pathChip, isSelected && styles.pathChipActive]}
                 onPress={() => handlePathSelect(path.id)}
                 activeOpacity={0.75}
               >
                 <Text
                   style={[
-                    styles.pathNum,
-                    isSelected && { color: COLORS.bg, opacity: 0.6 },
+                    styles.pathChipNum,
+                    isSelected && { color: COLORS.bg, opacity: 0.7 },
                   ]}
                 >
                   {String(idx + 1).padStart(2, "0")}
                 </Text>
                 <Text
                   style={[
-                    styles.pathName,
+                    styles.pathChipName,
                     isSelected && { color: COLORS.bg },
                   ]}
                 >
                   {path.label.toUpperCase()}
                 </Text>
-                {isSelected && <Text style={styles.pathStar}>★</Text>}
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
+
+        {/* Selected path description */}
+        <Text style={styles.pathDescription}>
+          {SIGMA_PATHS.find((p) => p.id === selectedPath)?.description ?? ""}
+        </Text>
 
         <View style={styles.eyebrowRow}>
           <View style={styles.eyebrowLine} />
           <Text style={styles.eyebrow}>02 / DROP THE PIC</Text>
         </View>
 
-        {/* Big CTA */}
+        {/* Big CTA — opens native camera */}
         <View style={styles.ctaArea}>
           <TouchableOpacity
-            onPress={pickImage}
+            onPress={takePhoto}
             activeOpacity={0.85}
             style={styles.ctaBlock}
           >
             <Text style={styles.ctaHeadline}>GET{"\n"}COOKED.</Text>
             <View style={styles.ctaMeta}>
               <Text style={styles.ctaArrow}>→</Text>
-              <Text style={styles.ctaMetaText}>TAP · 3-5S TO RATE</Text>
+              <Text style={styles.ctaMetaText}>TAP TO OPEN CAMERA</Text>
             </View>
           </TouchableOpacity>
 
@@ -481,30 +488,16 @@ export default function VibeCheckScreen() {
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
-        </View>
 
-        {/* Bottom source selector */}
-        <View style={styles.sourceRow}>
+          {/* Gallery fallback */}
           <TouchableOpacity
-            style={styles.sourceBtn}
+            style={styles.gallerySecondary}
             onPress={pickImage}
             activeOpacity={0.7}
           >
-            <View style={styles.sourceIcon}>
-              <View style={styles.sourceIconBox} />
-            </View>
-            <Text style={styles.sourceLabel}>GALLERY</Text>
-          </TouchableOpacity>
-          <View style={styles.sourceDivider} />
-          <TouchableOpacity
-            style={styles.sourceBtn}
-            onPress={takePhoto}
-            activeOpacity={0.7}
-          >
-            <View style={styles.sourceIcon}>
-              <View style={styles.sourceIconCircle} />
-            </View>
-            <Text style={styles.sourceLabel}>CAMERA</Text>
+            <Text style={styles.gallerySecondaryText}>
+              OR PICK FROM GALLERY →
+            </Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -529,7 +522,7 @@ const styles = StyleSheet.create({
   resultScroll: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
-    paddingBottom: SPACING.lg,
+    paddingBottom: 120,
   },
   tabHint: {
     fontFamily: FONTS.mono,
@@ -588,40 +581,54 @@ const styles = StyleSheet.create({
     letterSpacing: 2.5,
   },
 
-  // ─── Path grid ───
-  pathGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
+  // ─── Path chips (horizontal scroll) ───
+  pathChipsScroll: {
+    marginHorizontal: -SPACING.lg,
   },
-  pathTile: {
-    width: "48.5%",
+  pathChipsRow: {
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: SPACING.lg,
+  },
+  pathChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     backgroundColor: COLORS.bgCard,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    position: "relative",
   },
-  pathTileActive: {
+  pathChipActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
-  pathNum: {
+  pathChipNum: {
     fontFamily: FONTS.mono,
     fontSize: 9,
     color: COLORS.textMuted,
-    letterSpacing: 1.5,
-    opacity: 0.7,
+    letterSpacing: 1.2,
   },
-  pathName: {
+  pathChipName: {
     fontFamily: FONTS.display,
-    fontSize: 17,
+    fontSize: 15,
     color: COLORS.textPrimary,
-    letterSpacing: -0.2,
-    marginTop: 2,
-    lineHeight: 17,
+    letterSpacing: -0.3,
+    lineHeight: 20,
+    includeFontPadding: false,
+    paddingTop: 2,
   },
+  pathDescription: {
+    fontFamily: FONTS.mono,
+    fontSize: 10,
+    color: COLORS.textMuted,
+    letterSpacing: 0.8,
+    lineHeight: 16,
+    paddingHorizontal: SPACING.xs,
+    marginTop: SPACING.sm,
+  },
+  // legacy unused
   pathStar: {
     position: "absolute",
     top: 8,
@@ -643,7 +650,9 @@ const styles = StyleSheet.create({
   ctaHeadline: {
     fontFamily: FONTS.display,
     fontSize: 80,
-    lineHeight: 72,
+    lineHeight: 92,
+    includeFontPadding: false,
+    paddingTop: 10,
     color: COLORS.bg,
     letterSpacing: -3,
   },
@@ -665,6 +674,17 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.monoBold,
     fontSize: 10,
     color: COLORS.bg,
+    letterSpacing: 2,
+  },
+  gallerySecondary: {
+    alignSelf: "center",
+    paddingVertical: SPACING.sm,
+    marginTop: 6,
+  },
+  gallerySecondaryText: {
+    fontFamily: FONTS.monoBold,
+    fontSize: 9,
+    color: COLORS.textMuted,
     letterSpacing: 2,
   },
 

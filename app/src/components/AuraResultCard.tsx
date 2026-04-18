@@ -10,15 +10,25 @@ import {
   Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import ViewShot from "react-native-view-shot";
-import * as MediaLibrary from "expo-media-library";
 import { COLORS, SPACING, FONTS } from "../constants/theme";
 import GrainOverlay from "./design/GrainOverlay";
 import CropMarks from "./design/CropMarks";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
-const CARD_HEIGHT = Math.round(CARD_WIDTH * (16 / 9)); // 9:16 card ratio
+const CARD_HEIGHT = Math.round(CARD_WIDTH * (16 / 9));
+
+// ─── Lazy view-shot + media-library ───
+// These use TurboModuleRegistry.getEnforcing which can fail on legacy bridge.
+// If they fail to load, share/download fall back gracefully.
+let captureRefFn: any = null;
+let MediaLibrary: any = null;
+try {
+  captureRefFn = require("react-native-view-shot").captureRef;
+} catch {}
+try {
+  MediaLibrary = require("expo-media-library");
+} catch {}
 
 interface AuraStat {
   label: string;
@@ -43,14 +53,10 @@ interface AuraResultCardProps {
   onToggleSave?: () => void;
 }
 
-// Tier color mapping — each tier gets its own treatment
-function getTierTreatment(tier: string): {
-  color: string;
-  label: string;
-} {
+function getTierTreatment(tier: string): { color: string; label: string } {
   const upper = tier.toUpperCase();
   if (upper.includes("SKIBIDI")) return { color: "#FFFFFF", label: "SKIBIDI LEGEND" };
-  if (upper.includes("MOG GOD")) return { color: COLORS.primary, label: "MOG GOD ✦" };
+  if (upper.includes("MOG GOD")) return { color: COLORS.primary, label: "MOG GOD" };
   if (upper.includes("SIGMA")) return { color: COLORS.primary, label: "SIGMA" };
   if (upper.includes("HIM") || upper.includes("HER")) return { color: COLORS.primary, label: "HIM / HER" };
   if (upper.includes("COOK")) return { color: "#FFB84D", label: "COOKING" };
@@ -59,7 +65,6 @@ function getTierTreatment(tier: string): {
   return { color: "#6B6B5E", label: "DOWN BAD" };
 }
 
-// Pretty-print sigma path for stamp
 function pathStamp(path?: string): string {
   if (!path) return "• AURAMAXXING";
   const map: Record<string, string> = {
@@ -75,7 +80,6 @@ function pathStamp(path?: string): string {
 }
 
 function issueNumber(score: number): string {
-  // Deterministic 5-digit issue # from score + date
   const day = new Date();
   const seed = score + day.getDate() * 37 + day.getMonth() * 101;
   return `#${String(seed).padStart(5, "0")}`;
@@ -94,48 +98,66 @@ export default function AuraResultCard({
   isSaved,
   onToggleSave,
 }: AuraResultCardProps) {
-  const viewShotRef = useRef<ViewShot>(null);
+  const cardRef = useRef<View>(null);
   const [view, setView] = useState<"roast" | "stats">("roast");
   const hasStats = Array.isArray(result.stats) && result.stats.length > 0;
   const tierTreatment = getTierTreatment(result.tier);
 
-  const handleShare = async () => {
+  const captureCard = async (): Promise<string | null> => {
     try {
-      if (!viewShotRef.current?.capture) return;
-      const uri = await viewShotRef.current.capture();
-      await Share.share({
-        url: uri,
-        message: `I scored ${result.aura_score} on Mogster — ${result.tier}\n\n"${result.roast}"`,
+      if (!captureRefFn || !cardRef.current) return null;
+      return await captureRefFn(cardRef, {
+        format: "png",
+        quality: 1,
+        result: "tmpfile",
       });
+    } catch (e) {
+      console.warn("Card capture failed:", e);
+      return null;
+    }
+  };
+
+  const handleShare = async () => {
+    const uri = await captureCard();
+    const message = `I scored ${result.aura_score} on Mogster — ${result.tier}\n\n"${result.roast}"`;
+    try {
+      if (uri) {
+        await Share.share({ url: uri, message });
+      } else {
+        await Share.share({ message });
+      }
     } catch (_) {}
   };
 
   const handleDownload = async () => {
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Need access", "Allow camera roll to download the card");
+      if (!MediaLibrary) {
+        Alert.alert("Not available", "Camera roll access not available.");
         return;
       }
-      if (!viewShotRef.current?.capture) return;
-      const uri = await viewShotRef.current.capture();
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Need access", "Allow camera roll to save the card");
+        return;
+      }
+      const uri = await captureCard();
+      if (!uri) {
+        Alert.alert("L detected", "Couldn't capture card. Try a screenshot instead.");
+        return;
+      }
       await MediaLibrary.saveToLibraryAsync(uri);
-      Alert.alert("W secured", "Card downloaded to camera roll");
-    } catch (err) {
-      Alert.alert("L detected", "Failed to download");
+      Alert.alert("W secured", "Card saved to your camera roll");
+    } catch (_) {
+      Alert.alert("L detected", "Failed to save card");
     }
   };
 
   return (
     <View style={styles.wrapper}>
-      {/* ─── CAPTURABLE CARD ─── */}
-      <ViewShot
-        ref={viewShotRef}
-        options={{ format: "png", quality: 1 }}
-        style={styles.captureArea}
-      >
+      {/* Card — ref for capture */}
+      <View ref={cardRef} collapsable={false} style={styles.captureArea}>
         <View style={styles.card}>
-          {/* Photo as background */}
+          {/* Photo — sits in top 65% so face is visible above text */}
           {imageUri && (
             <Image
               source={{ uri: imageUri }}
@@ -144,26 +166,22 @@ export default function AuraResultCard({
             />
           )}
 
-          {/* Gradient fade — transparent top, solid ink at bottom */}
+          {/* Gradient — starts lower so more image is visible */}
           <LinearGradient
             colors={[
               "transparent",
-              "transparent",
-              "rgba(10,10,10,0.65)",
-              "rgba(10,10,10,0.95)",
-              "rgba(10,10,10,0.99)",
+              "rgba(10,10,10,0.6)",
+              "rgba(10,10,10,0.92)",
+              COLORS.bgCard,
             ]}
-            locations={[0, 0.25, 0.55, 0.8, 1]}
+            locations={[0, 0.3, 0.6, 1]}
             style={styles.gradient}
           />
 
-          {/* Grain overlay */}
           <GrainOverlay opacity={0.06} />
-
-          {/* Crop registration marks */}
           <CropMarks color={COLORS.primary} size={18} inset={14} opacity={0.5} />
 
-          {/* Top metadata strip */}
+          {/* Top metadata */}
           <View style={styles.topStrip}>
             <View style={styles.pathStamp}>
               <Text style={styles.pathStampText}>{pathStamp(sigmaPath)}</Text>
@@ -174,9 +192,8 @@ export default function AuraResultCard({
             </View>
           </View>
 
-          {/* Bottom editorial block */}
+          {/* Bottom editorial block — compact to leave more room for photo */}
           <View style={styles.bottomBlock}>
-            {/* Tier label with hairline */}
             <View style={styles.tierRow}>
               <Text style={[styles.tierLabel, { color: tierTreatment.color }]}>
                 {tierTreatment.label}
@@ -184,7 +201,6 @@ export default function AuraResultCard({
               <View style={[styles.tierLine, { backgroundColor: tierTreatment.color }]} />
             </View>
 
-            {/* MEGA SCORE */}
             <View style={styles.scoreRow}>
               <Text
                 style={[styles.megaScore, { color: tierTreatment.color }]}
@@ -196,7 +212,6 @@ export default function AuraResultCard({
               <Text style={styles.auraTag}>AURA</Text>
             </View>
 
-            {/* Content swap: roast or stats */}
             {view === "roast" ? (
               <View style={styles.roastBlock}>
                 <Text style={styles.roast}>
@@ -231,16 +246,15 @@ export default function AuraResultCard({
               </View>
             )}
 
-            {/* Footer: username + brand strip */}
             <View style={styles.footer}>
               <Text style={styles.footerUser}>{username ? `@${username}` : ""}</Text>
               <Text style={styles.footerBrand}>MOGSTER / ISSUE 01</Text>
             </View>
           </View>
         </View>
-      </ViewShot>
+      </View>
 
-      {/* ─── VIEW TOGGLE ─── */}
+      {/* View toggle */}
       {hasStats && (
         <View style={styles.viewToggle}>
           <TouchableOpacity
@@ -264,7 +278,7 @@ export default function AuraResultCard({
         </View>
       )}
 
-      {/* ─── ACTION BUTTONS ─── */}
+      {/* Actions */}
       <View style={styles.actions}>
         {onToggleSave && (
           <TouchableOpacity
@@ -293,7 +307,11 @@ export default function AuraResultCard({
           <Text style={styles.primaryBtnIcon}>↗</Text>
           <Text style={styles.primaryBtnText}>SHARE</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn} onPress={handleDownload} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.iconBtn}
+          onPress={handleDownload}
+          activeOpacity={0.8}
+        >
           <Text style={[styles.iconBtnIcon, { color: COLORS.textSecondary }]}>↓</Text>
         </TouchableOpacity>
       </View>
@@ -317,21 +335,24 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
+  // Photo sits in top portion, bleeds past midpoint into the gradient zone
   photo: {
     position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "75%",
   },
 
+  // Gradient only covers bottom portion where text lives
   gradient: {
     position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: "55%",
   },
 
-  // ─── Top strip ───
   topStrip: {
     position: "absolute",
     top: SPACING.lg + 4,
@@ -371,10 +392,9 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 
-  // ─── Bottom block ───
   bottomBlock: {
     position: "absolute",
-    bottom: SPACING.lg,
+    bottom: SPACING.md,
     left: SPACING.lg,
     right: SPACING.lg,
     zIndex: 4,
@@ -397,19 +417,16 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
 
-  // MEGA SCORE
   scoreRow: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 12,
-    marginBottom: SPACING.sm,
+    alignItems: "baseline",
+    marginBottom: 2,
+    marginTop: -8,
   },
   megaScore: {
     fontFamily: FONTS.display,
-    fontSize: 112,
-    lineHeight: 104,
+    fontSize: 80,
     letterSpacing: -2,
-    includeFontPadding: false,
     textShadowColor: "rgba(0,0,0,0.7)",
     textShadowOffset: { width: 0, height: 3 },
     textShadowRadius: 12,
@@ -419,45 +436,43 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.primary,
     letterSpacing: 2,
-    paddingBottom: 14,
+    marginLeft: 14,
   },
 
-  // ─── Roast block ───
   roastBlock: {
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: "rgba(255, 214, 10, 0.2)",
-    paddingVertical: 10,
-    marginBottom: SPACING.sm,
+    paddingVertical: 8,
+    marginBottom: 6,
   },
   roast: {
     fontFamily: FONTS.display,
-    fontSize: 15,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 17,
     color: COLORS.textPrimary,
     letterSpacing: -0.2,
   },
   quoteMark: {
     color: COLORS.primary,
-    fontSize: 18,
+    fontSize: 16,
   },
   personalityRead: {
     fontFamily: FONTS.mono,
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: 10,
+    lineHeight: 14,
     color: "rgba(245,241,230,0.72)",
-    marginTop: 8,
+    marginTop: 6,
     letterSpacing: 0.2,
   },
 
-  // ─── Stats block ───
   statsBlock: {
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: "rgba(255, 214, 10, 0.2)",
-    paddingVertical: 10,
-    marginBottom: SPACING.sm,
-    gap: 5,
+    paddingVertical: 8,
+    marginBottom: 6,
+    gap: 4,
   },
   statRow: {
     flexDirection: "row",
@@ -486,7 +501,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 
-  // Footer
   footer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -505,7 +519,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
 
-  // ─── View toggle ───
   viewToggle: {
     flexDirection: "row",
     marginTop: SPACING.md,
@@ -530,7 +543,6 @@ const styles = StyleSheet.create({
     color: COLORS.bg,
   },
 
-  // ─── Actions ───
   actions: {
     flexDirection: "row",
     gap: SPACING.sm,
