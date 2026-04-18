@@ -4,4 +4,8 @@
   --color-hazard-yellow: #FFD60A;
   --color-ink: #0A0A0A;
   --color-cream: #F5F1E6;
+
+  --font-display: var(--font-anton);
+  --font-mono: var(--font-jbmono);
+  --font-body: var(--font-inter);
 }
