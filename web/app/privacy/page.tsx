@@ -158,7 +158,14 @@ export default function PrivacyPage() {
           <p>
             Mogster is for users 13 and older. If you&apos;re under 13, please
             don&apos;t create an account. If you think a child under 13 has
-            created an account, email support@mogster.app and we&apos;ll remove
+            created an account, email{" "}
+            <a
+              className="underline hover:no-underline"
+              href="mailto:support@mogster.app"
+            >
+              support@mogster.app
+            </a>{" "}
+            and we&apos;ll remove
             it.
           </p>
 
