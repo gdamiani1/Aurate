@@ -26,6 +26,7 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   fetchProfile: () => Promise<void>;
+  updateUsername: (username: string) => Promise<void>;
   setPath: (path: string) => void;
   checkOnboarding: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
@@ -62,11 +63,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: null, profile: null, onboardingComplete: null });
   },
 
-  fetchProfile: async () => {
+  updateUsername: async (username: string) => {
+    const trimmed = username.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,20}$/.test(trimmed)) {
+      throw new Error("Username must be 3-20 chars, lowercase letters, numbers, underscores only.");
+    }
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-    set({ user, profile: data, loading: false });
+    if (!user) throw new Error("Not signed in");
+    const { error } = await supabase
+      .from("profiles")
+      .update({ username: trimmed, display_name: trimmed })
+      .eq("id", user.id);
+    if (error) {
+      if (error.code === "23505" || error.message?.includes("duplicate")) {
+        throw new Error("That username is taken, bro.");
+      }
+      throw new Error(error.message);
+    }
+    await get().fetchProfile();
   },
 
   setPath: (path) => {
@@ -74,12 +88,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   checkOnboarding: async () => {
-    const val = await AsyncStorage.getItem(ONBOARDING_KEY);
-    set({ onboardingComplete: val === "true" });
+    try {
+      const val = await AsyncStorage.getItem(ONBOARDING_KEY);
+      set({ onboardingComplete: val === "true" });
+    } catch (e) {
+      console.warn("checkOnboarding failed, defaulting to not-complete:", e);
+      set({ onboardingComplete: false });
+    }
   },
 
   completeOnboarding: async () => {
-    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    try {
+      await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    } catch (e) {
+      console.warn("completeOnboarding setItem failed:", e);
+    }
     set({ onboardingComplete: true });
+  },
+
+  fetchProfile: async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      set({ user, profile: data, loading: false });
+    } catch (e) {
+      console.warn("fetchProfile failed:", e);
+      set({ loading: false });
+    }
   },
 }));
