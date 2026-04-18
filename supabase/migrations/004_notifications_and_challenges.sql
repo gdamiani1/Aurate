@@ -18,3 +18,8 @@ create policy "push_tokens_self"
 -- Track which aura_checks qualified for today's daily challenge
 alter table public.aura_checks
   add column challenge_completed boolean not null default false;
+
+-- Partial index for "did this user complete a challenge today" lookups
+create index aura_checks_challenge_completed_idx
+  on public.aura_checks (user_id, created_at)
+  where challenge_completed = true;

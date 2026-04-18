@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLORS, SPACING, FONTS } from "../../src/constants/theme";
 import { requestPermissionsAndRegister } from "../../src/lib/notifications";
@@ -9,7 +9,6 @@ import { useAuthStore } from "../../src/store/authStore";
 const PRIMER_DECLINED_KEY = "notification_primer_declined_at";
 
 export default function NotificationsPrimer() {
-  const router = useRouter();
   const completeOnboarding = useAuthStore((s) => s.completeOnboarding);
 
   const onAllow = async () => {
@@ -24,28 +23,30 @@ export default function NotificationsPrimer() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.eyebrowRow}>
-        <View style={styles.eyebrowLine} />
-        <Text style={styles.eyebrow}>SECTION 04 · NOTIFICATIONS</Text>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <View style={styles.inner}>
+        <View style={styles.eyebrowRow}>
+          <View style={styles.eyebrowLine} />
+          <Text style={styles.eyebrow}>ONE LAST THING</Text>
+        </View>
+
+        <Text style={styles.headline}>AURA{"\n"}NEEDS{"\n"}DAILY.</Text>
+
+        <Text style={styles.pitch}>
+          A quick nudge so your streak doesn't die — and you never miss today's challenge bonus.
+        </Text>
+
+        <View style={styles.spacer} />
+
+        <TouchableOpacity style={styles.primary} onPress={onAllow} activeOpacity={0.85}>
+          <Text style={styles.primaryText}>TURN ON NOTIFICATIONS →</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.secondary} onPress={onLater} activeOpacity={0.7}>
+          <Text style={styles.secondaryText}>MAYBE LATER</Text>
+        </TouchableOpacity>
       </View>
-
-      <Text style={styles.headline}>AURA{"\n"}NEEDS{"\n"}DAILY.</Text>
-
-      <Text style={styles.pitch}>
-        A quick nudge so your streak doesn't die — and you never miss today's challenge bonus.
-      </Text>
-
-      <View style={styles.spacer} />
-
-      <TouchableOpacity style={styles.primary} onPress={onAllow} activeOpacity={0.85}>
-        <Text style={styles.primaryText}>TURN ON NOTIFICATIONS →</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.secondary} onPress={onLater} activeOpacity={0.7}>
-        <Text style={styles.secondaryText}>MAYBE LATER</Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -53,9 +54,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.bg,
-    padding: SPACING.lg,
-    paddingTop: SPACING.xxl * 2,
-    paddingBottom: SPACING.xxl,
+  },
+  inner: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.xxl,
+    paddingBottom: SPACING.lg,
   },
   eyebrowRow: {
     flexDirection: "row",

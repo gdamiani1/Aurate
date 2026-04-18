@@ -99,6 +99,21 @@ export default function YourAuraScreen() {
     setNotifOn(v);
     try {
       if (v) {
+        // If OS-level denied with no re-prompt, the in-app flow can't grant;
+        // send the user to Settings instead.
+        const { status, canAskAgain } = await getPermissionStatus();
+        if (status === "denied" && !canAskAgain) {
+          setNotifOn(false);
+          Alert.alert(
+            "Notifications are off",
+            "Enable notifications for Mogster in iOS Settings to turn this on.",
+            [
+              { text: "Cancel", style: "cancel" },
+              { text: "Open Settings", onPress: () => Linking.openSettings() },
+            ]
+          );
+          return;
+        }
         const token = await requestPermissionsAndRegister();
         if (!token) setNotifOn(false);
       } else {
@@ -456,7 +471,7 @@ export default function YourAuraScreen() {
                   value={notifOn}
                   onValueChange={toggleNotif}
                   trackColor={{ false: COLORS.border, true: COLORS.primary }}
-                  thumbColor={COLORS.bg}
+                  thumbColor={notifOn ? COLORS.bg : COLORS.textPrimary}
                   ios_backgroundColor={COLORS.border}
                 />
               </View>

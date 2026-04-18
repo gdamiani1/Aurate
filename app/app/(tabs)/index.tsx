@@ -97,6 +97,7 @@ export default function VibeCheckScreen() {
   const [showingLatest, setShowingLatest] = useState(false); // true = viewing saved latest, false = fresh check
   const [latestCheckId, setLatestCheckId] = useState<string | null>(null);
   const [latestIsSaved, setLatestIsSaved] = useState(false);
+  const [challengeCompletedToday, setChallengeCompletedToday] = useState(false);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0.4)).current;
@@ -245,6 +246,9 @@ export default function VibeCheckScreen() {
       // Fresh checks aren't saved by default; capture id for the bookmark button
       setLatestCheckId((data as any).check_id || null);
       setLatestIsSaved(false);
+      if ((data as any).challenge_completed === true) {
+        setChallengeCompletedToday(true);
+      }
       // Reschedule streak-saver ping for tomorrow 22:00 (fire-and-forget)
       void scheduleStreakSaver();
     } catch (err: any) {
@@ -285,6 +289,15 @@ export default function VibeCheckScreen() {
         setLatestIsSaved(latest.is_saved === true);
         setShowingLatest(true);
       }
+      // Derive today's challenge-completion state from any matching check today
+      const todayISO = new Date().toISOString().split("T")[0];
+      const doneToday = (json.checks || []).some(
+        (c: any) =>
+          c.challenge_completed === true &&
+          typeof c.created_at === "string" &&
+          c.created_at.startsWith(todayISO)
+      );
+      setChallengeCompletedToday(doneToday);
     } catch {
       // Silent fail — just show empty state
     }
@@ -421,7 +434,7 @@ export default function VibeCheckScreen() {
           </View>
         </View>
 
-        <DailyChallengeBanner />
+        <DailyChallengeBanner completed={challengeCompletedToday} />
 
         <View style={styles.eyebrowRow}>
           <View style={styles.eyebrowLine} />
