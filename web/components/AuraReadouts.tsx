@@ -69,7 +69,7 @@ export default function AuraReadouts() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 overflow-hidden hidden md:block"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden hidden md:block xl:hidden"
     >
       {READOUTS.map((r, i) => (
         <div
