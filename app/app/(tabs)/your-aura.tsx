@@ -13,6 +13,7 @@ import {
   Linking,
 } from "react-native";
 import Constants from "expo-constants";
+import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -170,8 +171,24 @@ export default function YourAuraScreen() {
     ]);
   };
 
-  const openLink = (url: string) => {
-    Linking.openURL(url).catch(() => {});
+  const openLink = async (url: string) => {
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (!canOpen) throw new Error(`Cannot open URL: ${url}`);
+      await Linking.openURL(url);
+    } catch {
+      try {
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Error
+        );
+      } catch {
+        // Haptics may not be available on all devices; non-critical
+      }
+      Alert.alert(
+        "Cannot open link",
+        "We couldn't open that page. Try again in a moment — or email support@mogster.app."
+      );
+    }
   };
 
   const appVersion =

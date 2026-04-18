@@ -9,10 +9,35 @@ import {
 import { Bungee_400Regular } from "@expo-google-fonts/bungee";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/store/authStore";
 import RootErrorBoundary from "../src/components/RootErrorBoundary";
+
+function parseTokensFromMogsterUrl(
+  url: string
+): { accessToken: string; refreshToken: string } | null {
+  // Expect: mogster://auth/callback#access_token=…&refresh_token=…
+  try {
+    const { scheme, hostname, path } = Linking.parse(url);
+    if (scheme !== "mogster") return null;
+    if (hostname !== "auth") return null;
+    if (path !== "callback") return null;
+
+    // Supabase returns tokens in the URL hash — Linking.parse does NOT read the
+    // hash fragment, so extract it manually.
+    const hashIdx = url.indexOf("#");
+    if (hashIdx === -1) return null;
+    const params = new URLSearchParams(url.slice(hashIdx + 1));
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    if (!accessToken || !refreshToken) return null;
+    return { accessToken, refreshToken };
+  } catch {
+    return null;
+  }
+}
 
 export { ErrorBoundary } from "expo-router";
 
@@ -110,6 +135,40 @@ function RootLayoutNav() {
 
     return () => {
       if (unsub) unsub();
+    };
+  }, []);
+
+  /* Handle mogster://auth/callback deep links — cold start + warm invocation */
+  useEffect(() => {
+    const handleUrl = async (url: string | null) => {
+      if (!url) return;
+      const tokens = parseTokensFromMogsterUrl(url);
+      if (!tokens) return;
+      try {
+        const { error } = await supabase.auth.setSession({
+          access_token: tokens.accessToken,
+          refresh_token: tokens.refreshToken,
+        });
+        if (error) {
+          console.warn("Failed to set session from deep link:", error.message);
+          return;
+        }
+        await useAuthStore.getState().fetchProfile();
+      } catch (e) {
+        console.warn("Deep-link session handling failed:", e);
+      }
+    };
+
+    Linking.getInitialURL()
+      .then(handleUrl)
+      .catch((e) => console.warn("getInitialURL failed:", e));
+
+    const sub = Linking.addEventListener("url", (e) => {
+      handleUrl(e.url);
+    });
+
+    return () => {
+      sub.remove();
     };
   }, []);
 
