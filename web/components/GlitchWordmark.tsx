@@ -39,12 +39,12 @@ export default function GlitchWordmark({ className }: GlitchWordmarkProps) {
 
   return (
     <span
-      className={`font-display uppercase tracking-tight text-ink leading-none inline-block text-7xl md:text-8xl${
+      className={`font-display uppercase tracking-tight leading-none inline-block text-7xl md:text-8xl${
         className ? ` ${className}` : ''
       }`}
     >
       <span ref={ref} className="mogster-glitch">MOGSTER</span>
-      <span>.</span>
+      <span className="text-hazard-yellow">.</span>
     </span>
   );
 }

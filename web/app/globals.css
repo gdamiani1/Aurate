@@ -3,7 +3,9 @@
 @theme {
   --color-hazard-yellow: #FFD60A;
   --color-ink: #0A0A0A;
+  --color-ink-2: #14140F;
   --color-cream: #F5F1E6;
+  --color-ghost: #6B6B5E;
 
   --font-display: var(--font-anton);
   --font-mono: var(--font-jbmono);
@@ -38,27 +40,6 @@
 .mogster-flicker > span:nth-child(1) { animation: mogster-flicker-a 1.8s steps(1, end) infinite; }
 .mogster-flicker > span:nth-child(2) { animation: mogster-flicker-b 1.8s steps(1, end) infinite; }
 .mogster-flicker > span:nth-child(3) { animation: mogster-flicker-c 1.8s steps(1, end) infinite; }
-
-/* ---------- Motion: cursor-follow aura blob ---------- */
-.mogster-blob {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--color-hazard-yellow) 0%, transparent 70%);
-  mix-blend-mode: difference;
-  pointer-events: none;
-  z-index: 20;
-  opacity: 0;
-  transform: translate(calc(var(--mogster-blob-x, -9999px) - 100px), calc(var(--mogster-blob-y, -9999px) - 100px));
-  transition: transform 120ms ease-out, opacity 300ms ease-out;
-}
-.mogster-blob[data-visible="true"] { opacity: 0.85; }
-@media (hover: none), (pointer: coarse) {
-  .mogster-blob { display: none; }
-}
 
 /* ---------- Motion: electric flicker wordmark entrance ----------
  * Neon-sign power-on: flickers on/off a few times with a cyan electric
