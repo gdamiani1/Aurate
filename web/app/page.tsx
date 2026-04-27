@@ -37,48 +37,39 @@ export default function Home() {
       </header>
 
       {/* HERO ────────────────────────────────────────────────────────────── */}
-      <section className="relative z-10 px-6 md:px-10 xl:px-16 pt-10 md:pt-16 pb-16">
-        <div className="mx-auto w-full max-w-2xl xl:max-w-7xl xl:grid xl:grid-cols-12 xl:gap-12 xl:items-start">
+      <section className="relative z-10 px-6 md:px-10 xl:px-16 pt-8 md:pt-12 pb-12 md:pb-16">
+        <div className="mx-auto w-full max-w-2xl xl:max-w-7xl xl:grid xl:grid-cols-12 xl:gap-16 xl:items-center">
+          {/* LEFT — content */}
           <div className="xl:col-span-7">
-            <p className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-hazard-yellow mb-6">
+            <p className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-hazard-yellow mb-5">
               ── 00 / drop a pic. get cooked.
             </p>
 
-            <h1 className="font-display text-6xl md:text-7xl xl:text-9xl text-cream tracking-tight leading-[0.9]">
+            <h1 className="font-display text-6xl md:text-7xl xl:text-8xl text-cream tracking-tight leading-[0.9]">
               <span className="block">YOUR AURA.</span>
               <span className="block">RATED.</span>
               <span className="block">NO <span className="text-hazard-yellow">CAP.</span></span>
             </h1>
 
-            <p className="mt-8 font-mono text-sm md:text-base text-cream/80 max-w-prose leading-relaxed">
+            <p className="mt-6 font-mono text-sm md:text-base text-cream/80 max-w-prose leading-relaxed">
               The hot take you screenshot and argue with. Pick your lens, get scored
               0–1000 with a roast that goes stupid hard. Climb the Mog Board.
-              Battle your friends. One pic away from HIM.
+              Battle your friends.
             </p>
-
-            {/* WAITLIST — above the fold */}
-            <div className="mt-10 max-w-md">
-              <WaitlistForm />
-            </div>
           </div>
 
-          {/* Editorial side-rail (desktop only) */}
-          <aside className="hidden xl:block xl:col-span-5 xl:pt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream/60">
-            <div className="border border-hazard-yellow/25 p-6">
-              <p className="text-hazard-yellow mb-4">▌ STATION READOUT</p>
-              <ul className="space-y-3 leading-relaxed">
-                <li><span className="text-hazard-yellow">▸</span>  7 sigma paths</li>
-                <li><span className="text-hazard-yellow">▸</span>  AI scoring 0–1000</li>
-                <li><span className="text-hazard-yellow">▸</span>  global + friends mog board</li>
-                <li><span className="text-hazard-yellow">▸</span>  1v1 battles, narrated</li>
-                <li><span className="text-hazard-yellow">▸</span>  daily challenges, multipliers</li>
-                <li><span className="text-hazard-yellow">▸</span>  the cookbook (premium)</li>
-              </ul>
-              <p className="mt-6 text-hazard-yellow/40 text-[9px]">
-                ── Mogster is 16+ ──
+          {/* RIGHT — waitlist (desktop) / below content (mobile) */}
+          <div className="mt-10 xl:mt-0 xl:col-span-5">
+            <div className="xl:border xl:border-hazard-yellow/25 xl:p-6">
+              <p className="hidden xl:block font-mono text-[10px] uppercase tracking-[0.3em] text-hazard-yellow mb-5">
+                ▌ JOIN THE WAITLIST
+              </p>
+              <WaitlistForm />
+              <p className="hidden xl:block mt-5 font-mono text-[9px] uppercase tracking-[0.2em] text-hazard-yellow/40">
+                ── one email when it ships. mogster is 16+. ──
               </p>
             </div>
-          </aside>
+          </div>
         </div>
       </section>
 

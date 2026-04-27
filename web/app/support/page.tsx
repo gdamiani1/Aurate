@@ -83,46 +83,47 @@ export default function SupportPage() {
         </a>
       </header>
 
-      {/* HERO */}
-      <section className="relative z-10 px-6 md:px-10 xl:px-16 pt-12 md:pt-20 pb-12 md:pb-16">
-        <div className="mx-auto w-full max-w-3xl">
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-hazard-yellow mb-6">
-            ── 00 / incoming transmission
-          </p>
-          <h1 className="font-display text-6xl md:text-8xl xl:text-9xl text-cream tracking-tight leading-[0.9] mb-8">
-            <span className="block">SOMETHING</span>
-            <span className="block"><span className="text-hazard-yellow">COOKED?</span></span>
-          </h1>
-          <p className="font-mono text-sm md:text-base text-cream/80 max-w-prose leading-relaxed">
-            Email-only. No tickets, no chat bots, no &quot;please wait 5–7 business days.&quot;
-            Every message goes to a real human. Most replies inside 48 hours.
-          </p>
+      {/* HERO + DIRECT LINE (two-col on desktop) */}
+      <section className="relative z-10 px-6 md:px-10 xl:px-16 pt-8 md:pt-12 pb-12 md:pb-16">
+        <div className="mx-auto w-full max-w-2xl xl:max-w-7xl xl:grid xl:grid-cols-12 xl:gap-16 xl:items-center">
+          {/* LEFT — content */}
+          <div className="xl:col-span-7">
+            <p className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-hazard-yellow mb-5">
+              ── 00 / incoming transmission
+            </p>
+            <h1 className="font-display text-6xl md:text-7xl xl:text-8xl text-cream tracking-tight leading-[0.9] mb-6">
+              <span className="block">SOMETHING</span>
+              <span className="block"><span className="text-hazard-yellow">COOKED?</span></span>
+            </h1>
+            <p className="font-mono text-sm md:text-base text-cream/80 max-w-prose leading-relaxed">
+              Email-only. No tickets, no chat bots, no &quot;please wait 5–7 business days.&quot;
+              Every message goes to a real human. Most replies inside 48 hours.
+            </p>
+          </div>
+
+          {/* RIGHT — direct line card */}
+          <div className="mt-10 xl:mt-0 xl:col-span-5">
+            <div className="border-2 border-hazard-yellow bg-ink-2 p-6 md:p-8">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-hazard-yellow mb-4">
+                ▌ DIRECT LINE
+              </p>
+              <a
+                href="mailto:help@mogster.app"
+                className="font-display text-3xl md:text-4xl xl:text-5xl text-cream tracking-tight leading-none hover:text-hazard-yellow transition-colors block mb-5 break-all"
+              >
+                help@mogster.app
+              </a>
+              <ul className="font-mono text-xs text-cream/70 space-y-2 leading-relaxed">
+                <li><span className="text-hazard-yellow">▸</span>  Response within 48 hours</li>
+                <li><span className="text-hazard-yellow">▸</span>  Email from the address on your account</li>
+                <li><span className="text-hazard-yellow">▸</span>  Include username + screenshot if relevant</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
       <HazardStripe height="sm" />
-
-      {/* CONTACT CARD */}
-      <section className="relative z-10 px-6 md:px-10 xl:px-16 py-12 md:py-16 border-b border-hazard-yellow/25">
-        <div className="mx-auto w-full max-w-3xl">
-          <div className="border-2 border-hazard-yellow bg-ink-2 p-6 md:p-10">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-hazard-yellow mb-4">
-              ▌ DIRECT LINE
-            </p>
-            <a
-              href="mailto:help@mogster.app"
-              className="font-display text-4xl md:text-6xl text-cream tracking-tight leading-none hover:text-hazard-yellow transition-colors block mb-6"
-            >
-              help@mogster.app
-            </a>
-            <ul className="font-mono text-xs md:text-sm text-cream/70 space-y-2 leading-relaxed">
-              <li><span className="text-hazard-yellow">▸</span>  Response within 48 hours, usually faster</li>
-              <li><span className="text-hazard-yellow">▸</span>  Email from the address on your Mogster account</li>
-              <li><span className="text-hazard-yellow">▸</span>  Include username + screenshot if relevant</li>
-            </ul>
-          </div>
-        </div>
-      </section>
 
       {/* FAQ */}
       <section className="relative z-10 px-6 md:px-10 xl:px-16 py-16 md:py-24 border-b border-hazard-yellow/25">
