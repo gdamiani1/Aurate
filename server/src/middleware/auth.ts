@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 export interface AuthedRequest extends FastifyRequest {
   userId?: string;
   unlimitedChecks?: boolean;
+  moderationOverride?: boolean;
 }
 
 /**
@@ -34,12 +35,13 @@ export async function requireAuth(
 
   request.userId = data.user.id;
 
-  // Look up unlimited_checks flag from profile
+  // Look up flags from profile
   const { data: profile } = await supabase
     .from("profiles")
-    .select("unlimited_checks")
+    .select("unlimited_checks, moderation_override")
     .eq("id", data.user.id)
     .single();
 
   request.unlimitedChecks = profile?.unlimited_checks === true;
+  request.moderationOverride = profile?.moderation_override === true;
 }

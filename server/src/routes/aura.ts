@@ -3,9 +3,17 @@ import multipart from "@fastify/multipart";
 import { supabase } from "../lib/supabase";
 import { redis, LEADERBOARD_KEYS } from "../lib/redis";
 import { rateAura } from "../ai/rate";
+import { ModerationBlockError } from "../ai/errors";
 import { SigmaPath, SIGMA_PATHS } from "../ai/types";
 import { requireAuth, AuthedRequest } from "../middleware/auth";
 import { applyChallengeBonus } from "../lib/daily";
+import {
+  preCheck,
+  handleSafetyBlock,
+  moderateOutput,
+  logEvent,
+  SAFE_FALLBACK_ROAST,
+} from "../middleware/moderation";
 
 const DAILY_LIMIT = 15;
 
@@ -45,6 +53,18 @@ export async function auraRoutes(app: FastifyInstance) {
     }
 
     const buffer = await data.toBuffer();
+
+    // Pre-Gemini moderation gate: strikes + cost circuit breaker
+    const pre = await preCheck({ userId, sigmaPath, requestId: request.id });
+    if (!pre.allow) {
+      return reply.status(403).send({
+        error: "AURA_UNREADABLE",
+        copy_tier: pre.copyTier,
+        retry_allowed: pre.retryAllowed === true,
+        hard_locked: pre.hardLocked === true,
+      });
+    }
+
     const imageBase64 = buffer.toString("base64");
 
     // Upload to Supabase Storage
@@ -56,8 +76,78 @@ export async function auraRoutes(app: FastifyInstance) {
 
     const { data: urlData } = supabase.storage.from("aura-pics").getPublicUrl(fileName);
 
-    // AI Rating
-    const result = await rateAura(imageBase64, sigmaPath);
+    // AI Rating — wrap to catch Gemini SAFETY blocks
+    let result;
+    try {
+      result = await rateAura(imageBase64, sigmaPath);
+    } catch (err) {
+      if (err instanceof ModerationBlockError) {
+        const mod = await handleSafetyBlock(err, {
+          userId,
+          sigmaPath,
+          imageBuffer: buffer,
+          requestId: request.id,
+        });
+        return reply.status(403).send({
+          error: "AURA_UNREADABLE",
+          copy_tier: mod.copyTier,
+          retry_allowed: mod.retryAllowed === true,
+          retry_after: mod.softLockedUntil?.toISOString(),
+          hard_locked: mod.hardLocked === true,
+        });
+      }
+      throw err;
+    }
+
+    // Output blocklist gate — catch body-feature shaming and regenerate once
+    const outputCheck = moderateOutput(result.roast);
+    if (outputCheck.flagged) {
+      await logEvent({
+        userId,
+        sigmaPath,
+        requestId: request.id,
+        event_type: "output_blocklist",
+        severity: "regenerated",
+        provider: "internal_blocklist",
+        matched_term: outputCheck.matchedTerm,
+      });
+
+      try {
+        const retry = await rateAura(imageBase64, sigmaPath, { strict: true });
+        const retryCheck = moderateOutput(retry.roast);
+        if (retryCheck.flagged) {
+          await logEvent({
+            userId,
+            sigmaPath,
+            requestId: request.id,
+            event_type: "output_blocklist",
+            severity: "reject",
+            provider: "internal_blocklist",
+            matched_term: retryCheck.matchedTerm,
+            attempt_number: 2,
+          });
+          result = {
+            ...retry,
+            roast: SAFE_FALLBACK_ROAST.roast,
+            personality_read: SAFE_FALLBACK_ROAST.personality_read,
+          };
+        } else {
+          result = retry;
+        }
+      } catch (err) {
+        if (err instanceof ModerationBlockError) {
+          // Strict-mode retry hit Gemini SAFETY — fall back to safe roast,
+          // keep original score/stats (the image was fine, the roast wasn't).
+          result = {
+            ...result,
+            roast: SAFE_FALLBACK_ROAST.roast,
+            personality_read: SAFE_FALLBACK_ROAST.personality_read,
+          };
+        } else {
+          throw err;
+        }
+      }
+    }
 
     // Apply today's daily-challenge bonus (if sigma_path matches)
     const { finalScore, multiplier, challengeCompleted } = applyChallengeBonus(
