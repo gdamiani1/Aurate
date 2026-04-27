@@ -38,9 +38,22 @@ export async function requireAuth(
   // Look up flags from profile
   const { data: profile } = await supabase
     .from("profiles")
-    .select("unlimited_checks, moderation_override")
+    .select("unlimited_checks, moderation_override, dob")
     .eq("id", data.user.id)
     .single();
+
+  // Age defense-in-depth: DB CHECK constraint rejects sub-16 inserts;
+  // this catches any anomaly that slipped through (admin override, race,
+  // etc.). Legacy NULL dobs are allowed — pre-migration accounts.
+  if (profile?.dob) {
+    const ageYears =
+      (Date.now() - new Date(profile.dob).getTime()) /
+      (1000 * 60 * 60 * 24 * 365.25);
+    if (ageYears < 16) {
+      reply.status(403).send({ error: "AGE_RESTRICTED" });
+      return;
+    }
+  }
 
   request.unlimitedChecks = profile?.unlimited_checks === true;
   request.moderationOverride = profile?.moderation_override === true;
