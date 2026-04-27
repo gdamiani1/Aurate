@@ -30,7 +30,7 @@ export default function PrivacyPage() {
           <h1 className="font-display text-4xl md:text-5xl tracking-tight leading-none">
             PRIVACY POLICY
           </h1>
-          <p className="mt-2 font-mono text-sm">Effective 2026-04-18</p>
+          <p className="mt-2 font-mono text-sm">Effective 2026-04-27</p>
 
           <h2 className="font-display text-2xl mt-8 mb-2">Who runs Mogster</h2>
           <p>
@@ -53,6 +53,10 @@ export default function PrivacyPage() {
             </li>
             <li>
               Passwords — hashed by Supabase Auth. We never see the plaintext.
+            </li>
+            <li>
+              Date of birth — provided at signup so we can verify you meet our
+              16+ age requirement.
             </li>
             <li>
               Selfie images you upload for aura rating, stored in Supabase
@@ -157,17 +161,44 @@ export default function PrivacyPage() {
 
           <h2 className="font-display text-2xl mt-8 mb-2">Age restriction</h2>
           <p>
-            Mogster is for users 13 and older. If you&apos;re under 13, please
-            don&apos;t create an account. If you think a child under 13 has
-            created an account, email{" "}
+            Mogster is for users 16 and older. We ask for your date of birth at
+            signup and require you to confirm you meet this age requirement. We
+            don&apos;t knowingly collect data from anyone under 16.
+          </p>
+          <p className="mt-3">
+            If you discover a user under 16 has created an account — or you are
+            a parent who has discovered your child has done so — email{" "}
             <a
               className="underline hover:no-underline"
-              href="mailto:support@mogster.app"
+              href="mailto:help@mogster.app"
             >
-              support@mogster.app
+              help@mogster.app
             </a>{" "}
-            and we&apos;ll remove
-            it.
+            and we&apos;ll review and remove the account. Misrepresenting age is
+            a violation of our Terms and grounds for account deletion.
+          </p>
+
+          <h2 className="font-display text-2xl mt-8 mb-2">
+            Content moderation
+          </h2>
+          <p>
+            We screen uploaded images using AI-based safety classification
+            (Google Gemini&apos;s built-in content filter) and screen generated
+            roast text against an internal blocklist. Images that fail
+            moderation are not retained — only a SHA-256 hash is logged for
+            audit purposes. Moderation event logs are kept for up to 90 days
+            (with personally identifiable fields stripped after 30 days), then
+            deleted.
+          </p>
+          <p className="mt-3">
+            If you believe your content was incorrectly flagged, email{" "}
+            <a
+              className="underline hover:no-underline"
+              href="mailto:help@mogster.app"
+            >
+              help@mogster.app
+            </a>{" "}
+            and we&apos;ll review.
           </p>
 
           <h2 className="font-display text-2xl mt-8 mb-2">Data location</h2>

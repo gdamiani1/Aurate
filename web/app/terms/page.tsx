@@ -29,7 +29,7 @@ export default function TermsPage() {
           <h1 className="font-display text-4xl md:text-5xl tracking-tight leading-none">
             TERMS OF SERVICE
           </h1>
-          <p className="mt-2 font-mono text-sm">Effective 2026-04-18</p>
+          <p className="mt-2 font-mono text-sm">Effective 2026-04-27</p>
 
           <h2 className="font-display text-2xl mt-8 mb-2">Acceptance</h2>
           <p>
@@ -42,6 +42,25 @@ export default function TermsPage() {
             Mogster is an AI-powered &quot;aura rating&quot; app. Upload a
             selfie, get a score, get a roast. It&apos;s for entertainment — not
             a serious psychological assessment.
+          </p>
+
+          <h2 className="font-display text-2xl mt-8 mb-2">Age requirement</h2>
+          <p>
+            Mogster is for users 16 and older. By creating an account, you
+            confirm you meet this age requirement. We collect your date of birth
+            at signup to enforce this. Misrepresenting your age is a violation
+            of these terms and grounds for account deletion without warning.
+          </p>
+          <p className="mt-3">
+            If you&apos;re a parent who has discovered your child has created an
+            account, email{" "}
+            <a
+              href="mailto:help@mogster.app"
+              className="underline"
+            >
+              help@mogster.app
+            </a>{" "}
+            and we&apos;ll remove the account.
           </p>
 
           <h2 className="font-display text-2xl mt-8 mb-2">Your account</h2>
