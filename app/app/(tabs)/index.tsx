@@ -480,6 +480,7 @@ export default function VibeCheckScreen() {
                     styles.pathChipName,
                     isSelected && { color: COLORS.bg },
                   ]}
+                  numberOfLines={1}
                 >
                   {path.label.toUpperCase()}
                 </Text>
@@ -625,18 +626,19 @@ const styles = StyleSheet.create({
   },
   pathChipsRow: {
     flexDirection: "row",
-    gap: 6,
+    gap: 8,
     paddingHorizontal: SPACING.lg,
   },
   pathChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     backgroundColor: COLORS.bgCard,
     borderWidth: 1,
     borderColor: COLORS.border,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 10,
+    overflow: "hidden",
   },
   pathChipActive: {
     backgroundColor: COLORS.primary,
@@ -653,9 +655,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textPrimary,
     letterSpacing: -0.3,
-    lineHeight: 20,
+    lineHeight: 18,
     includeFontPadding: false,
     paddingTop: 2,
+    flexShrink: 0,
   },
   pathDescription: {
     fontFamily: FONTS.mono,
