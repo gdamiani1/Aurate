@@ -1,0 +1,291 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Colors — Tier Accents</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  .tier {
+    position: relative;
+    padding: 14px 14px 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    min-height: 122px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .tier .num {
+    font-family: var(--font-display);
+    font-size: 32px;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    padding-top: 4px;
+  }
+  .tier .name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    padding-top: 2px;
+    text-transform: uppercase;
+  }
+  .tier .range {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 8px;
+    letter-spacing: 0.22em;
+    margin-top: 4px;
+  }
+  .tier .grain {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* T1 DOWN BAD — dead, near-black, dim red lifeline */
+  .t-downbad { background: #1A0606; color: #6b3c3c; }
+  .t-downbad .num { color: #4a1a1a; }
+  .t-downbad .name { color: #6b3c3c; }
+  .t-downbad .range { color: var(--blood); }
+  .t-downbad::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 4px, rgba(255,59,48,0.08) 4px 5px);
+  }
+
+  /* T2 NPC — flat institutional grey, scanlines */
+  .t-npc { background: #2a2a26; color: #8a8878; }
+  .t-npc .num { color: #6b6b5e; }
+  .t-npc .name { color: #8a8878; }
+  .t-npc .range { color: #8a8878; }
+  .t-npc::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.25) 3px, rgba(0,0,0,0) 4px);
+    mix-blend-mode: multiply;
+  }
+
+  /* T3 6-7 — dim bronze, subtle */
+  .t-67 { background: #2a1f0e; color: #C9A14A; border-color: #4a3818; }
+  .t-67 .num { color: #C9A14A; }
+  .t-67 .name { color: #e8be62; }
+  .t-67 .range { color: #C9A14A; }
+
+  /* T4 COOKING — orange heat, wider stripe */
+  .t-cooking {
+    background: linear-gradient(180deg, #FFB84D 0%, #FF7B2A 100%);
+    color: var(--ink);
+    border-color: #FF7B2A;
+  }
+  .t-cooking .num { color: var(--ink); }
+  .t-cooking .name { color: var(--ink); }
+  .t-cooking .range { color: var(--ink); opacity: 0.7; }
+  .t-cooking::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: repeating-linear-gradient(45deg, var(--ink) 0 6px, var(--hazard) 6px 12px);
+  }
+
+  /* T5 HIM/HER — full hazard fill, the brand statement */
+  .t-himher {
+    background: var(--hazard);
+    color: var(--ink);
+    border-color: var(--hazard);
+    box-shadow: 0 0 0 2px var(--ink), 0 0 0 3px var(--hazard);
+  }
+  .t-himher .num { color: var(--ink); font-size: 38px; }
+  .t-himher .name { color: var(--ink); font-size: 14px; }
+  .t-himher .range { color: var(--ink); opacity: 0.8; }
+  .t-himher::after {
+    content: "★"; position: absolute; top: 8px; right: 10px;
+    font-family: var(--font-display); font-size: 14px; color: var(--ink);
+  }
+
+  /* T6 SIGMA — hazard with diagonal hazard tape, dialed up */
+  .t-sigma {
+    background: var(--hazard);
+    color: var(--ink);
+    border-color: var(--ink);
+    box-shadow: 0 0 0 2px var(--hazard), 0 0 0 4px var(--ink), 0 0 28px rgba(255,214,10,0.5);
+  }
+  .t-sigma .num { color: var(--ink); font-size: 40px; }
+  .t-sigma .name { color: var(--ink); font-size: 15px; font-weight: bold; }
+  .t-sigma .range { color: var(--ink); }
+  .t-sigma::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent 0 14px, rgba(10,10,10,0.18) 14px 18px);
+    pointer-events: none;
+  }
+  .t-sigma::after {
+    content: "▌▌"; position: absolute; top: 8px; right: 10px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink); letter-spacing: 0;
+  }
+
+  /* T7 MOG GOD — radial heat, glowing, embers */
+  .t-moggod {
+    background: radial-gradient(circle at 50% 60%, #FFE74A 0%, #FF8A1A 30%, #C42600 60%, #2A0500 100%);
+    color: #FFF6D1;
+    border-color: var(--hazard);
+    box-shadow:
+      0 0 0 2px var(--ink),
+      0 0 0 3px var(--hazard),
+      0 0 38px rgba(255,138,26,0.7),
+      inset 0 0 60px rgba(255,140,0,0.4);
+  }
+  .t-moggod .num { color: #FFF6D1; font-size: 42px; text-shadow: 0 0 16px rgba(255,200,40,0.9), 0 0 4px rgba(255,255,255,0.6); }
+  .t-moggod .name { color: #FFF6D1; font-size: 15px; text-shadow: 0 0 10px rgba(255,180,40,0.8); }
+  .t-moggod .range { color: var(--hazard); }
+  .t-moggod::after {
+    content: "◉ HEAT"; position: absolute; top: 8px; right: 10px;
+    font-family: var(--font-mono); font-weight: 700; font-size: 8px; letter-spacing: 0.2em; color: #FFF6D1;
+    text-shadow: 0 0 8px rgba(255,180,40,0.9);
+  }
+
+  /* T8 SKIBIDI — broken-the-game tier · RGB glitch · holo shimmer · physical vibration */
+  .t-skibidi {
+    background:
+      linear-gradient(115deg,
+        #FF00C8 0%,
+        #FFD60A 18%,
+        #00F0FF 38%,
+        #7FFFA1 55%,
+        #FFD60A 72%,
+        #FF3B30 88%,
+        #FF00C8 100%);
+    background-size: 280% 280%;
+    color: var(--paper);
+    border-color: var(--paper);
+    box-shadow:
+      0 0 0 2px var(--ink),
+      0 0 0 4px var(--hazard),
+      0 0 0 5px var(--ink),
+      0 0 0 7px var(--paper),
+      0 0 28px rgba(255,0,200,0.7),
+      0 0 60px rgba(0,240,255,0.6),
+      0 0 100px rgba(255,214,10,0.5);
+    animation: holo-shift 3.4s ease-in-out infinite, judder 0.32s steps(2) infinite;
+  }
+  .t-skibidi .num {
+    color: var(--paper);
+    font-size: 46px;
+    text-shadow:
+      -2px 0 0 #FF00C8,
+       2px 0 0 #00F0FF,
+       0 0 12px rgba(255,255,255,0.9);
+    animation: chroma 0.18s steps(2) infinite;
+  }
+  .t-skibidi .name {
+    color: var(--hazard);
+    font-size: 13px;
+    background: var(--ink);
+    display: inline-block;
+    padding: 3px 6px;
+    margin-top: 4px;
+    box-shadow: -2px 2px 0 #FF00C8, 2px -2px 0 #00F0FF;
+  }
+  .t-skibidi .range {
+    color: var(--paper);
+    background: var(--ink);
+    display: inline-block;
+    padding: 2px 4px;
+  }
+  /* hazard tape top + animated scanlines */
+  .t-skibidi::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(45deg, var(--ink) 0 6px, var(--hazard) 6px 12px) top / 100% 5px no-repeat,
+      repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,0.18) 3px 4px);
+    pointer-events: none;
+    animation: scan 1.6s linear infinite;
+  }
+  .t-skibidi::after {
+    content: "▓ GLITCH";
+    position: absolute; top: 8px; right: 8px;
+    font-family: var(--font-mono); font-weight: 700; font-size: 9px; letter-spacing: 0.18em;
+    background: var(--ink); color: var(--hazard);
+    padding: 3px 6px;
+    transform: rotate(4deg);
+    box-shadow: -2px 2px 0 #FF00C8, 2px -2px 0 #00F0FF;
+    animation: flicker 1.1s steps(2) infinite;
+  }
+
+  @keyframes holo-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes judder {
+    0%, 100% { transform: translate(0, 0); }
+    25%      { transform: translate(0.5px, -0.5px); }
+    50%      { transform: translate(-0.5px, 0.5px); }
+    75%      { transform: translate(0.5px, 0.5px); }
+  }
+  @keyframes chroma {
+    0%, 100% { text-shadow: -2px 0 0 #FF00C8,  2px 0 0 #00F0FF, 0 0 12px rgba(255,255,255,0.9); }
+    50%      { text-shadow:  2px 0 0 #FF00C8, -2px 0 0 #00F0FF, 0 0 12px rgba(255,255,255,0.9); }
+  }
+  @keyframes scan {
+    0%   { background-position: top, 0 0; }
+    100% { background-position: top, 0 4px; }
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; transform: rotate(4deg) translateX(1px); }
+  }
+</style>
+</head>
+<body><div class="card">
+  <div class="eyebrow-mini">── COLOR / TIER ACCENTS · LOW IS LOW · HIGH IS A RUSH</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+
+    <div class="tier t-downbad">
+      <div><div class="num">01</div><div class="name">DOWN BAD</div></div>
+      <div class="range">000–199 · L</div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="tier t-npc">
+      <div><div class="num">02</div><div class="name">NPC</div></div>
+      <div class="range">200–399 · MID</div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="tier t-67">
+      <div><div class="num">03</div><div class="name">6 — 7</div></div>
+      <div class="range">400–599 · OK</div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="tier t-cooking">
+      <div><div class="num">04</div><div class="name">COOKING</div></div>
+      <div class="range">600–799 · HOT</div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="tier t-himher">
+      <div><div class="num">05</div><div class="name">HIM / HER</div></div>
+      <div class="range">800–899 · W</div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="tier t-sigma">
+      <div><div class="num">06</div><div class="name">SIGMA</div></div>
+      <div class="range">900–949 · ELITE</div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="tier t-moggod">
+      <div><div class="num">07</div><div class="name">MOG GOD</div></div>
+      <div class="range">950–999 · RARE</div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="tier t-skibidi">
+      <div><div class="num">08</div><div class="name">SKIBIDI</div></div>
+      <div class="range">1000 · NO CAP</div>
+      <div class="grain"></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:14px;font-family:var(--font-mono);font-size:9px;color:var(--ghost);letter-spacing:0.18em;text-transform:uppercase;">
+    ▌ floor is dim &amp; visible · ceiling glows · 800+ is when the kitchen opens
+  </div>
+</div></body></html>

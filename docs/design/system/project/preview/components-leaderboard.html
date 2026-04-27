@@ -1,0 +1,233 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Mog Board Row</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--ink-2);
+    border: 1px solid var(--border);
+    border-top: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .row:first-of-type { border-top: 1px solid var(--border); }
+
+  .rank {
+    font-family: var(--font-display);
+    font-size: 28px; line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+    width: 46px;
+    padding-top: 4px;
+  }
+  .body { flex: 1; min-width: 0; }
+  .user {
+    font-family: var(--font-display);
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    padding-top: 2px;
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--ghost);
+    margin-top: 2px;
+  }
+  .score {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+    padding-top: 4px;
+  }
+
+  /* ─── 01 — THE THRONE ─────────────────────────────────── */
+  .throne {
+    background: radial-gradient(circle at 80% 50%, #FFE74A 0%, #FFD60A 35%, #C49500 100%);
+    border: 1px solid var(--ink);
+    box-shadow:
+      0 0 0 2px var(--hazard),
+      0 0 0 3px var(--ink),
+      0 0 40px rgba(255,214,10,0.6),
+      inset 0 0 0 1px rgba(10,10,10,0.15);
+    padding: 20px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* hazard tape stripes BG */
+  .throne::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent 0 18px, rgba(10,10,10,0.08) 18px 24px);
+    pointer-events: none;
+  }
+  /* shimmer sweep */
+  .throne::after {
+    content: ""; position: absolute; top: 0; bottom: 0; left: -50%;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+    animation: shimmer 3.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .throne .rank {
+    font-size: 64px; color: var(--ink); width: 90px;
+    text-shadow: 2px 2px 0 rgba(255,255,255,0.4);
+  }
+  .throne .crown {
+    position: absolute; top: 8px; left: 78px;
+    font-family: var(--font-mono);
+    font-weight: 700; font-size: 9px; letter-spacing: 0.3em;
+    color: var(--ink);
+  }
+  .throne .body { z-index: 2; }
+  .throne .user { color: var(--ink); font-size: 22px; }
+  .throne .meta { color: var(--ink); opacity: 0.75; }
+  .throne .score { color: var(--ink); font-size: 56px; }
+  .throne .stamp {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--ink); color: var(--hazard);
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 9px; letter-spacing: 0.22em;
+    padding: 4px 8px;
+    transform: rotate(3deg);
+    z-index: 3;
+  }
+  .throne .streak-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--ink) 0 8px, transparent 8px 12px);
+  }
+
+  /* ─── 02 / 03 — PODIUM ─────────────────────────────────── */
+  .podium { background: var(--ink-2); border-color: var(--hazard-25); }
+  .podium .rank { color: var(--hazard); }
+  .podium-2 .rank::after, .podium-3 .rank::after {
+    content: ""; display: block;
+    width: 36px; height: 2px; background: var(--hazard);
+    margin-top: 4px;
+  }
+
+  /* ─── YOU — RISING ROW ─────────────────────────────────── */
+  .you {
+    background: linear-gradient(90deg, rgba(127,255,161,0.08) 0%, var(--ink-2) 60%);
+    border: 1px solid var(--mint);
+    border-left: 4px solid var(--mint);
+    box-shadow: 0 0 0 1px rgba(127,255,161,0.15), 0 0 24px rgba(127,255,161,0.18);
+    padding-left: 11px;
+    position: relative;
+  }
+  .you .rank { color: var(--mint); }
+  .you .user { color: var(--mint); }
+  .you .meta { color: var(--mint); opacity: 0.85; }
+  .you .score { color: var(--mint); }
+
+  .you .delta {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--mint); color: var(--ink);
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 9px; letter-spacing: 0.22em;
+    padding: 3px 7px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .you .delta::before {
+    content: "▲"; font-size: 8px;
+    animation: rise 1.2s ease-in-out infinite;
+  }
+
+  /* trail of where-you-were */
+  .trail {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px 8px 11px;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-left: 4px solid var(--mint);
+    background: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--ghost);
+    text-transform: uppercase;
+  }
+  .trail .ghost-rank {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--ghost);
+    letter-spacing: -0.04em;
+    text-decoration: line-through;
+    text-decoration-color: var(--mint);
+  }
+
+  @keyframes shimmer {
+    0%   { transform: translateX(0); }
+    60%, 100% { transform: translateX(380%); }
+  }
+  @keyframes rise {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+  }
+</style>
+</head>
+<body><div class="card">
+  <div class="eyebrow-mini">── COMPONENT / MOG BOARD ROW · #1 IS A THRONE · CLIMBING IS A RUSH</div>
+
+  <!-- THRONE -->
+  <div class="row throne">
+    <div class="rank">01</div>
+    <div class="crown">▌ HIM</div>
+    <span class="stamp">★ MOG GOD</span>
+    <div class="body">
+      <div class="user">@DRIPLORD.WAV</div>
+      <div class="meta">PEAK 988 · 17 STREAK · UNCONTESTED 4 WK</div>
+    </div>
+    <div class="score">963</div>
+    <div class="streak-bar"></div>
+  </div>
+
+  <!-- PODIUM 2 -->
+  <div class="row podium podium-2">
+    <div class="rank">02</div>
+    <div class="body">
+      <div class="user">@SIGMASZN</div>
+      <div class="meta">PEAK · SIGMA · 9 STREAK</div>
+    </div>
+    <div class="score">947</div>
+  </div>
+
+  <!-- PODIUM 3 -->
+  <div class="row podium podium-3">
+    <div class="rank">03</div>
+    <div class="body">
+      <div class="user">@AURA404</div>
+      <div class="meta">PEAK · SIGMA · 6 STREAK</div>
+    </div>
+    <div class="score">921</div>
+  </div>
+
+  <!-- gap -->
+  <div style="text-align:center;font-family:var(--font-mono);font-size:9px;letter-spacing:0.3em;color:var(--ghost);padding:8px 0;border-left:1px solid var(--border);border-right:1px solid var(--border);background:var(--ink);">· · ·  POSITIONS 04 — 13  · · ·</div>
+
+  <!-- YOU — climbing -->
+  <div class="row you">
+    <span class="delta">+3 SPOTS · GLOWING UP</span>
+    <div class="rank">14</div>
+    <div class="body">
+      <div class="user">@YOU (YOUGOTMOGGED)</div>
+      <div class="meta">▲ 3 SPOTS THIS WEEK · 4 STREAK · NEXT TIER 947</div>
+    </div>
+    <div class="score">874</div>
+  </div>
+
+  <!-- ghost trail -->
+  <div class="trail">
+    <div class="ghost-rank">17</div>
+    <span style="color:var(--mint);">↑ FROM 17 ON 04.21</span>
+    <span style="margin-left:auto;color:var(--ghost);">CATCH @AURA404 IN 47 PTS</span>
+  </div>
+
+  <div style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:var(--ghost);letter-spacing:0.18em;text-transform:uppercase;">
+    ▌ #1 = full hazard fill · shimmer sweep · crown stamp · streak bar · climbing = mint glow + ghost trail of past rank
+  </div>
+</div></body></html>

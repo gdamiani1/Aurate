@@ -20,7 +20,9 @@
         "NSPhotoLibraryUsageDescription": "Pick a photo from your library to get your aura rated",
         "NSCameraUsageDescription": "Take a photo to get your aura rated",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
@@ -61,7 +63,8 @@
           "icon": "./assets/images/icon.png",
           "color": "#FFD60A"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true

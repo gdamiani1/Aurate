@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Textures</title>
+<link rel="stylesheet" href="_base.css"></head>
+<body><div class="card">
+  <div class="eyebrow-mini">── TEXTURE / GRAIN · HAZARD TAPE · SCANLINES</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+    <div>
+      <div style="height:90px;background:var(--ink-2);border:1px solid var(--border);position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;opacity:0.35;mix-blend-mode:overlay;background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;);"></div>
+      </div>
+      <div class="token-name" style="margin-top:8px;">GRAIN</div>
+      <div class="token-value">SVG noise · 0.07 opacity · overlay · always on</div>
+    </div>
+    <div>
+      <div style="height:90px;background-image:repeating-linear-gradient(45deg, var(--ink) 0 12px, var(--hazard) 12px 24px);border:1px solid var(--border);"></div>
+      <div class="token-name" style="margin-top:8px;">HAZARD TAPE</div>
+      <div class="token-value">45° stripes · 12px / 12px · section dividers</div>
+    </div>
+    <div>
+      <div style="height:90px;background:var(--ink-2);border:1px solid var(--border);position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.4) 3px, rgba(0,0,0,0) 4px);"></div>
+      </div>
+      <div class="token-name" style="margin-top:8px;">SCANLINES</div>
+      <div class="token-value">0deg lines · multiply · loading panels only</div>
+    </div>
+  </div>
+</div></body></html>

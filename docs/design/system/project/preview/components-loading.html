@@ -1,0 +1,461 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Loading Screen</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 820px;
+    background: var(--ink);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .stage::before, .stage::after {
+    content: "";
+    position: absolute; left: 0; right: 0; height: 5px;
+    background: repeating-linear-gradient(45deg, var(--ink) 0 6px, var(--hazard) 6px 12px);
+    z-index: 9;
+  }
+  .stage::before { top: 0; }
+  .stage::after  { bottom: 0; }
+
+  .scanlines {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,0.18) 3px 4px);
+    pointer-events: none;
+    z-index: 8;
+    animation: scan 2.4s linear infinite;
+  }
+  @keyframes scan { 100% { background-position: 0 4px; } }
+
+  .grain-bg {
+    position: absolute; inset: 0; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.07;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  /* ─── TOP STATUS ─────────────────────────────────── */
+  .status {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 22px 22px 10px;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 9px; letter-spacing: 0.24em;
+    color: var(--hazard);
+    z-index: 6; position: relative;
+  }
+  .status .live-dot {
+    display: inline-block; width: 6px; height: 6px;
+    background: var(--hazard); margin-right: 6px;
+    animation: blink 0.7s steps(2) infinite;
+    vertical-align: 1px;
+  }
+  @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0.2; } }
+
+  /* ─── MAIN STAGE — BIG TYPE + DOSSIER ───────────── */
+  .center {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    padding: 18px 28px 0;
+    position: relative;
+    z-index: 4;
+  }
+
+  /* LEFT — DOSSIER CARD (the "ID being processed") */
+  .dossier {
+    position: relative;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 12px 12px 14px;
+    box-shadow: 6px 6px 0 var(--hazard), 7px 7px 0 var(--ink);
+    transform: rotate(-2.2deg);
+    animation: tilt 4.6s ease-in-out infinite;
+  }
+  @keyframes tilt {
+    0%, 100% { transform: rotate(-2.2deg) translateY(0); }
+    50%      { transform: rotate(-1.4deg) translateY(-3px); }
+  }
+  .dossier-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 6px; margin-bottom: 8px;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 8px; letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  .dossier-head .title { font-family: var(--font-display); font-size: 14px; letter-spacing: -0.01em; }
+  .photo {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    background:
+      repeating-linear-gradient(45deg, transparent 0 14px, rgba(10,10,10,0.07) 14px 18px),
+      var(--hazard);
+    border: 1px solid var(--ink);
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  /* photo gets a subject silhouette so it's not a flat square */
+  .photo svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+  }
+  /* the scan line — sweeps top to bottom over the photo */
+  .photo::after {
+    content: "";
+    position: absolute; left: -2px; right: -2px;
+    height: 3px;
+    background: var(--ink);
+    box-shadow: 0 0 0 1px var(--hazard), 0 0 12px rgba(255,214,10,0.8);
+    animation: photo-scan 1.4s ease-in-out infinite;
+  }
+  @keyframes photo-scan {
+    0%   { top: -3px; }
+    50%  { top: 100%; }
+    100% { top: -3px; }
+  }
+  /* corner crops on photo */
+  .photo .pcrop {
+    position: absolute; width: 10px; height: 10px;
+    border-color: var(--ink); border-style: solid;
+    z-index: 3;
+  }
+  .photo .pcrop.tl { top: 4px;    left: 4px;    border-width: 2px 0 0 2px; }
+  .photo .pcrop.tr { top: 4px;    right: 4px;   border-width: 2px 2px 0 0; }
+  .photo .pcrop.bl { bottom: 4px; left: 4px;    border-width: 0 0 2px 2px; }
+  .photo .pcrop.br { bottom: 4px; right: 4px;   border-width: 0 2px 2px 0; }
+
+  .dossier-rows {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  .dossier-rows .r {
+    display: flex; justify-content: space-between;
+    border-bottom: 1px dotted rgba(10,10,10,0.4);
+    padding: 2px 0;
+  }
+  .dossier-rows .r b { font-weight: 700; }
+
+  /* PENDING stamp — slams in periodically */
+  .stamp {
+    position: absolute;
+    top: 28%; right: -18px;
+    font-family: var(--font-display);
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    color: var(--blood);
+    border: 3px solid var(--blood);
+    padding: 4px 10px 2px;
+    transform: rotate(-14deg) scale(0.8);
+    background: rgba(245,241,230,0.4);
+    text-transform: uppercase;
+    animation: stamp 3.6s ease-in-out infinite;
+    z-index: 5;
+    opacity: 0;
+  }
+  @keyframes stamp {
+    0%, 60% { opacity: 0; transform: rotate(-14deg) scale(1.4); }
+    62%     { opacity: 1; transform: rotate(-14deg) scale(0.92); }
+    65%     { opacity: 1; transform: rotate(-14deg) scale(1.0); }
+    95%     { opacity: 1; }
+    100%    { opacity: 0; }
+  }
+
+  /* RIGHT — BIG CHURNING TYPE + ANALYSIS BARS */
+  .console {
+    display: flex; flex-direction: column;
+    gap: 16px;
+    padding-top: 4px;
+  }
+
+  /* glitchy headline that cycles verdicts */
+  .verdict {
+    font-family: var(--font-display);
+    font-size: 56px;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+    position: relative;
+    height: 110px;
+    overflow: hidden;
+  }
+  .verdict-track {
+    display: flex; flex-direction: column;
+    animation: cycle 8s steps(4) infinite;
+  }
+  .verdict-track > div {
+    height: 110px;
+    display: flex; align-items: flex-start; flex-wrap: wrap;
+  }
+  .verdict-track .em { color: var(--hazard); }
+  .verdict-track .strike {
+    color: var(--ghost);
+    text-decoration: line-through;
+    text-decoration-color: var(--blood);
+  }
+  @keyframes cycle {
+    0%, 22%   { transform: translateY(0); }
+    25%, 47%  { transform: translateY(-110px); }
+    50%, 72%  { transform: translateY(-220px); }
+    75%, 97%  { transform: translateY(-330px); }
+    100%      { transform: translateY(0); }
+  }
+
+  /* analysis bars */
+  .bars {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 102px 1fr 38px;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .bar-row .lbl { color: var(--ghost); }
+  .bar-row .val { color: var(--hazard); text-align: right; }
+  .bar-track {
+    height: 10px;
+    background: var(--ink-2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    background: repeating-linear-gradient(45deg, var(--ink) 0 4px, var(--hazard) 4px 8px);
+    width: 0%;
+    animation: barfill 3.2s ease-out infinite;
+  }
+  .bar-row.b1 .bar-fill { animation-delay: 0s;    --to: 84%; }
+  .bar-row.b2 .bar-fill { animation-delay: 0.25s; --to: 71%; }
+  .bar-row.b3 .bar-fill { animation-delay: 0.5s;  --to: 92%; }
+  .bar-row.b4 .bar-fill { animation-delay: 0.75s; --to: 58%; }
+  .bar-row.b5 .bar-fill { animation-delay: 1s;    --to: 96%; }
+  @keyframes barfill {
+    0%   { width: 6%; }
+    70%  { width: var(--to, 80%); }
+    85%  { width: var(--to, 80%); }
+    100% { width: 6%; }
+  }
+  .bar-row.b3 .bar-fill { background: var(--hazard); }
+  .bar-row.b5 .bar-fill { background: var(--hazard); }
+
+  /* ─── MEASUREMENT TICKER ─────────────────────────── */
+  .ticker {
+    margin: 18px 28px 0;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 9px 14px;
+    display: flex; align-items: center; gap: 14px;
+    overflow: hidden;
+    position: relative;
+    z-index: 4;
+    border: 1px solid var(--ink);
+  }
+  .ticker::before {
+    content: "▌LIVE";
+    background: var(--hazard);
+    color: var(--ink);
+    padding: 4px 8px;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 9px; letter-spacing: 0.22em;
+    flex-shrink: 0;
+  }
+  .ticker-track {
+    display: flex; gap: 22px;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    animation: tick 22s linear infinite;
+  }
+  .ticker-track span { display: inline-flex; align-items: center; gap: 6px; }
+  .ticker-track b { color: var(--blood); font-weight: 700; }
+  .ticker-track i { color: var(--ghost); font-style: normal; margin: 0 8px; }
+  @keyframes tick {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ─── PROGRESS / READOUT ─────────────────────────── */
+  .progress {
+    margin: 16px 28px 0;
+    z-index: 4; position: relative;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 9px; letter-spacing: 0.22em;
+    color: var(--ghost);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .progress-label .accent { color: var(--hazard); }
+  .progress-track {
+    height: 8px;
+    background: var(--ink-2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: repeating-linear-gradient(45deg, var(--ink) 0 4px, var(--hazard) 4px 8px);
+    width: 0%;
+    animation: fill 4.6s ease-out infinite;
+  }
+  @keyframes fill {
+    0%   { width: 4%; }
+    65%  { width: 88%; }
+    90%  { width: 96%; }
+    100% { width: 96%; }
+  }
+
+  .readout {
+    margin: 14px 28px 22px;
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 8px; letter-spacing: 0.22em;
+    color: var(--ghost);
+    text-transform: uppercase;
+    z-index: 4; position: relative;
+  }
+  .readout span.h { color: var(--hazard); }
+
+  /* corner crop marks for the whole stage */
+  .crop {
+    position: absolute; width: 14px; height: 14px;
+    border-color: var(--hazard); border-style: solid;
+    z-index: 7;
+  }
+  .crop.tl { top: 12px;    left: 12px;    border-width: 2px 0 0 2px; }
+  .crop.tr { top: 12px;    right: 12px;   border-width: 2px 2px 0 0; }
+  .crop.bl { bottom: 12px; left: 12px;    border-width: 0 0 2px 2px; }
+  .crop.br { bottom: 12px; right: 12px;   border-width: 0 2px 2px 0; }
+</style>
+</head>
+<body><div class="card">
+  <div class="eyebrow-mini">── COMPONENT / LOADING · DOSSIER UNDER REVIEW</div>
+
+  <div class="stage">
+    <span class="crop tl"></span><span class="crop tr"></span>
+    <span class="crop bl"></span><span class="crop br"></span>
+    <div class="grain-bg"></div>
+
+    <div class="status">
+      <span><span class="live-dot"></span>UNDER REVIEW</span>
+      <span>CASE #00472 · LENS · SIGMA</span>
+      <span style="color:var(--paper);">73%</span>
+    </div>
+
+    <div class="center">
+
+      <!-- LEFT: dossier polaroid -->
+      <div class="dossier">
+        <div class="dossier-head">
+          <span class="title">DOSSIER</span>
+          <span>04.28.26</span>
+        </div>
+
+        <div class="photo">
+          <span class="pcrop tl"></span><span class="pcrop tr"></span>
+          <span class="pcrop bl"></span><span class="pcrop br"></span>
+          <!-- silhouette as photo placeholder, not a smiley -->
+          <svg viewBox="0 0 100 125" preserveAspectRatio="xMidYMid slice">
+            <rect width="100" height="125" fill="#FFD60A"/>
+            <!-- abstract bust silhouette -->
+            <path d="M 50 28 q -16 0 -16 18 q 0 9 5 14 q -16 6 -22 18 q -3 6 -3 14 v 33 h 72 v -33 q 0 -8 -3 -14 q -6 -12 -22 -18 q 5 -5 5 -14 q 0 -18 -16 -18 z" fill="#0A0A0A"/>
+            <!-- hazard cross-hairs over silhouette -->
+            <line x1="0" y1="62" x2="100" y2="62" stroke="#0A0A0A" stroke-width="0.4" stroke-dasharray="1.5 2"/>
+            <line x1="50" y1="0" x2="50" y2="125" stroke="#0A0A0A" stroke-width="0.4" stroke-dasharray="1.5 2"/>
+          </svg>
+        </div>
+
+        <div class="dossier-rows">
+          <div class="r"><span>SUBJ</span><b>@YOU</b></div>
+          <div class="r"><span>LENS</span><b>SIGMA</b></div>
+          <div class="r"><span>SCAN</span><b>04 / 04</b></div>
+          <div class="r"><span>JURY</span><b>HAIKU 4.5</b></div>
+          <div class="r"><span>VERDICT</span><b style="color:var(--blood);">PENDING</b></div>
+        </div>
+
+        <span class="stamp">PENDING</span>
+      </div>
+
+      <!-- RIGHT: console -->
+      <div class="console">
+        <div class="verdict">
+          <div class="verdict-track">
+            <div>analyzing your <span class="em">aura</span> fr fr</div>
+            <div>computing the <span class="em">mog</span> differential</div>
+            <div>checking if you're <span class="em">HIM</span></div>
+            <div>the AI is <span class="em">cooking</span> rn</div>
+          </div>
+        </div>
+
+        <div class="bars">
+          <div class="bar-row b1"><span class="lbl">DRIP</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">84</span></div>
+          <div class="bar-row b2"><span class="lbl">JAWLINE</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">71</span></div>
+          <div class="bar-row b3"><span class="lbl">SIGMA INDEX</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">92</span></div>
+          <div class="bar-row b4"><span class="lbl">VIBE</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">58</span></div>
+          <div class="bar-row b5"><span class="lbl">RIZZ</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">96</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- live ticker -->
+    <div class="ticker">
+      <div class="ticker-track">
+        <span><b>▲</b> JAWLINE +7</span><i>·</i>
+        <span><b>▲</b> DRIP +12</span><i>·</i>
+        <span><b>▼</b> NPC ENERGY −3</span><i>·</i>
+        <span><b>▲</b> RIZZ +18</span><i>·</i>
+        <span><b>▲</b> SIGMA INDEX +9</span><i>·</i>
+        <span><b>!</b> COOKING DETECTED</span><i>·</i>
+        <span><b>▲</b> AURA +24</span><i>·</i>
+        <!-- duplicate for seamless loop -->
+        <span><b>▲</b> JAWLINE +7</span><i>·</i>
+        <span><b>▲</b> DRIP +12</span><i>·</i>
+        <span><b>▼</b> NPC ENERGY −3</span><i>·</i>
+        <span><b>▲</b> RIZZ +18</span><i>·</i>
+        <span><b>▲</b> SIGMA INDEX +9</span><i>·</i>
+        <span><b>!</b> COOKING DETECTED</span><i>·</i>
+        <span><b>▲</b> AURA +24</span><i>·</i>
+      </div>
+    </div>
+
+    <!-- progress -->
+    <div class="progress">
+      <div class="progress-label">
+        <span>PASS 03 / 04 · ROAST GENERATION</span>
+        <span class="accent">EST. 2S</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- readout -->
+    <div class="readout">
+      <span>VIBE.CHK</span>
+      <span class="h">● JURY DELIBERATING</span>
+      <span>04.28 · 14:22</span>
+    </div>
+
+    <div class="scanlines"></div>
+  </div>
+
+  <div style="margin-top:14px;font-family:var(--font-mono);font-size:9px;color:var(--ghost);letter-spacing:0.18em;text-transform:uppercase;">
+    ▌ dossier card tilts &amp; breathes · photo gets scanned by hazard line · PENDING stamp slams every 3.6s · 5 metric bars fill at staggered timings · live ticker scrolls verdict deltas · mog board / press-room aesthetic
+  </div>
+</div></body></html>

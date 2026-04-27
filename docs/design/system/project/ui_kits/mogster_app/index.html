@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mogster · iOS UI Kit</title>
+<link rel="stylesheet" href="kit.css">
+</head>
+<body>
+
+<div class="kit-page">
+
+  <header class="kit-header">
+    <div>
+      <div style="font-family:var(--font-mono);font-weight:700;font-size:11px;letter-spacing:0.3em;color:var(--hazard);margin-bottom:14px;">── UI KIT / iOS · ISSUE N°01</div>
+      <div class="kit-title">MOGSTER<span class="dot">.</span></div>
+    </div>
+    <div class="kit-meta">
+      AURA MEASUREMENT STATION<br>
+      14 SCREENS · ONE FLOW · DARK ONLY<br>
+      04.28.26 · PRE-LAUNCH
+    </div>
+  </header>
+
+  <div class="kit-marquee">
+    <div class="kit-marquee-track">
+      <span>AURA MEASUREMENT STATION</span><span>⚠</span>
+      <span>CALIBRATING</span><span>⚠</span>
+      <span>SIGMA DETECTED</span><span>⚠</span>
+      <span>NO CAP VERIFIED</span><span>⚠</span>
+      <span>THE KITCHEN IS OPEN</span><span>⚠</span>
+      <span>AURA MEASUREMENT STATION</span><span>⚠</span>
+      <span>CALIBRATING</span><span>⚠</span>
+      <span>SIGMA DETECTED</span><span>⚠</span>
+      <span>NO CAP VERIFIED</span><span>⚠</span>
+      <span>THE KITCHEN IS OPEN</span><span>⚠</span>
+    </div>
+  </div>
+
+  <div class="screens-grid" id="grid"></div>
+
+</div>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- iOS frame + screens -->
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+
+<script type="text/babel">
+const SCREENS = [
+  { num: "01", label: "SPLASH",        sub: "first run · age-gated entry",                  comp: "Splash" },
+  { num: "02", label: "AGE GATE",      sub: "DOB picker · 16+ verification",                comp: "AgeGate" },
+  { num: "03", label: "HOME / CAMERA", sub: "viewfinder · the always-here screen",          comp: "Home" },
+  { num: "04", label: "PICK A LENS",   sub: "Sigma Path selector · scoring lens",           comp: "PickPath" },
+  { num: "05", label: "ANALYZING",     sub: "scanline read · brainrot copy rotates",        comp: "Analyzing" },
+  { num: "06", label: "SCORE RESULT",  sub: "the screenshotable artifact",                  comp: "ScoreResult" },
+  { num: "07", label: "MOG BOARD",     sub: "leaderboard · global / by path / circle",      comp: "MogBoard" },
+  { num: "08", label: "1V1 BATTLE",    sub: "split-screen score-off · 3 rounds",            comp: "Battle" },
+  { num: "09", label: "CHALLENGES",    sub: "daily lock-in · multipliers stack",            comp: "Challenges" },
+  { num: "10", label: "PROFILE",       sub: "the file · peak / avg / rank · grid",          comp: "Profile" },
+  { num: "11", label: "PAYWALL",       sub: "kitchen closed · MOGSTER PLUS upsell",         comp: "Paywall" },
+  { num: "12", label: "REJECT",        sub: "moderation A · low-signal customs reject",     comp: "Reject" },
+  { num: "13", label: "TOP TIER (1000)", sub: "skibidi alert · the rare max",                comp: "TopTier" },
+  { num: "14", label: "SETTINGS",      sub: "admin · toggles · destructive bottom",         comp: "Settings" },
+];
+
+function Kit() {
+  return SCREENS.map(({ num, label, sub, comp }) => {
+    const Comp = window[comp];
+    return (
+      <div className="screen-cell" key={num} data-screen-label={`${num} ${label}`}>
+        <IOSDevice width={320} height={693} dark={true}>
+          {Comp ? <Comp /> : null}
+        </IOSDevice>
+        <div className="screen-label"><span className="screen-num">{num}</span>{label}</div>
+        <div className="screen-sub">{sub}</div>
+      </div>
+    );
+  });
+}
+
+ReactDOM.createRoot(document.getElementById("grid")).render(<Kit />);
+</script>
+
+</body>
+</html>

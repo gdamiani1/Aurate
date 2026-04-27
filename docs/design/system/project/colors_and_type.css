@@ -1,0 +1,244 @@
+/* =========================================================================
+   MOGSTER — Colors & Type Foundation
+   "Your aura. Rated. No cap."
+   Dark editorial × brutalist × hazard-tape industrial
+   ========================================================================= */
+
+/* ---------- FONTS ---------- */
+/* Anton ships locally as a brand font (fonts/Anton_400_Regular.ttf).
+   JetBrains Mono + Bungee are loaded from Google Fonts — Bungee is the
+   approved stamp/badge face. */
+
+@font-face {
+  font-family: "Anton";
+  src: url("fonts/Anton_400_Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Bungee&display=swap");
+
+:root {
+  /* ─── COLOR — RAW PALETTE ─────────────────────────────────────────── */
+
+  /* Ground (the dark) */
+  --ink:           #0A0A0A;   /* primary background */
+  --ink-2:         #14140F;   /* cards, elevated surfaces */
+  --ink-3:         #1A1A12;   /* slightly lifted */
+
+  /* Paper (the light — never pure white) */
+  --paper:         #F5F1E6;   /* primary text on dark */
+  --paper-mute:    #A8A89B;   /* secondary text */
+  --ghost:         #6B6B5E;   /* metadata, captions, "less than" */
+
+  /* Signature accent — use SCARCELY */
+  --hazard:        #FFD60A;   /* THE brand color. wordmark dot, eyebrows, primary CTA, selected */
+  --hazard-25:     rgba(255, 214, 10, 0.25);
+  --hazard-12:     rgba(255, 214, 10, 0.12);
+  --hazard-06:     rgba(255, 214, 10, 0.06);
+
+  /* Semantic */
+  --mint:          #7FFFA1;   /* HIGH — wins, top-tier scores */
+  --blood:         #FF3B30;   /* LOSS — errors, low-tier scores */
+
+  /* Tier-specific accents (used inside cards) */
+  --tier-gold:     #FFB84D;   /* COOKING */
+  --tier-bronze:   #C9A14A;   /* 6-7 */
+  --tier-grey:     #8A8878;   /* NPC */
+
+  /* Lines */
+  --border:        #252520;
+  --border-haz:    var(--hazard-25);
+
+  /* Electric arc (used by wordmark glitch only — not for UI) */
+  --arc-cyan:      #00E5FF;
+
+  /* ─── TYPE — FAMILIES ─────────────────────────────────────────────── */
+  --font-display:  "Anton", "Helvetica Neue Condensed", sans-serif;
+  --font-stencil:  "Bungee", "Anton", sans-serif;
+  --font-mono:     "JetBrains Mono", "SFMono-Regular", "Menlo", monospace;
+
+  /* ─── TYPE — SEMANTIC ROLES ───────────────────────────────────────── */
+  /* Display = Anton. Mono = JetBrains Mono. NO body sans — mono IS the body. */
+
+  --display-1-size:        clamp(60px, 9vw, 140px);   /* page-killing display */
+  --display-1-leading:     0.85;
+  --display-1-tracking:    -0.02em;
+
+  --display-2-size:        clamp(44px, 6vw, 80px);    /* section title */
+  --display-2-leading:     0.9;
+  --display-2-tracking:    -0.02em;
+
+  --headline-size:         28px;                      /* card headline */
+  --headline-leading:      1.15;
+  --headline-tracking:     -0.01em;
+
+  --score-size:            120px;                     /* mega score on cards */
+  --score-leading:         0.85;
+  --score-tracking:        -0.05em;
+
+  --eyebrow-size:          11px;                      /* "── 02 / pick a lens" */
+  --eyebrow-tracking:      0.3em;
+  --eyebrow-weight:        500;
+
+  --label-size:            10px;                      /* ALL-CAPS metadata */
+  --label-tracking:        0.2em;
+
+  --body-size:             14px;                      /* JetBrainsMono body */
+  --body-leading:          1.55;
+  --body-tracking:         0.005em;
+
+  --caption-size:          11px;
+  --caption-leading:       1.5;
+  --caption-tracking:      0.05em;
+
+  /* ─── SPACING ─────────────────────────────────────────────────────── */
+  --s-xs:  4px;
+  --s-sm:  8px;
+  --s-md:  16px;
+  --s-lg:  24px;
+  --s-xl:  32px;
+  --s-2x:  48px;
+  --s-3x:  64px;
+  --s-4x:  96px;
+
+  /* ─── RADIUS — sharp by default ───────────────────────────────────── */
+  --r-none: 0;
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-card: 0;       /* editorial cards have sharp corners */
+
+  /* ─── BORDERS ─────────────────────────────────────────────────────── */
+  --hairline: 1px solid var(--border);
+  --hairline-haz: 1px solid var(--border-haz);
+  --rule-dashed: 2px dashed var(--hazard);
+
+  /* ─── MOTION TIMING ───────────────────────────────────────────────── */
+  --t-instant:   0ms;     /* hover/select snap */
+  --t-tap:       60ms;    /* score scale-in snap */
+  --t-fast:      180ms;   /* hazard-wipe traversal */
+  --t-mount:     320ms;   /* fade-up reveals */
+  --t-counter:   500ms;   /* score counter sweep */
+
+  --ease-out:    cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-snap:   cubic-bezier(0.6, 0, 0.4, 1);
+
+  /* Slam-cut — yes really, no transition */
+  --t-slamcut:   0ms;
+}
+
+/* =========================================================================
+   ELEMENT BASE STYLES (use directly or compose)
+   ========================================================================= */
+
+html, body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-size: var(--display-1-size);
+  line-height: var(--display-1-leading);
+  letter-spacing: var(--display-1-tracking);
+  text-transform: uppercase;
+  color: var(--paper);
+  margin: 0;
+}
+
+h2, .h2 {
+  font-family: var(--font-display);
+  font-size: var(--display-2-size);
+  line-height: var(--display-2-leading);
+  letter-spacing: var(--display-2-tracking);
+  text-transform: uppercase;
+  color: var(--paper);
+  margin: 0;
+}
+
+h3, .h3 {
+  font-family: var(--font-display);
+  font-size: var(--headline-size);
+  line-height: var(--headline-leading);
+  letter-spacing: var(--headline-tracking);
+  text-transform: uppercase;
+  color: var(--paper);
+  margin: 0;
+}
+
+p, .body {
+  font-family: var(--font-mono);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  color: var(--paper);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: var(--eyebrow-weight);
+  font-size: var(--eyebrow-size);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--hazard);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--label-size);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--paper-mute);
+}
+
+.caption {
+  font-family: var(--font-mono);
+  font-size: var(--caption-size);
+  line-height: var(--caption-leading);
+  letter-spacing: var(--caption-tracking);
+  color: var(--ghost);
+}
+
+.score {
+  font-family: var(--font-display);
+  font-size: var(--score-size);
+  line-height: var(--score-leading);
+  letter-spacing: var(--score-tracking);
+  color: var(--paper);
+}
+
+.stencil {
+  font-family: var(--font-stencil);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Microcopy register — lowercase JetBrainsMono */
+.microcopy {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: none;       /* lowercase carries voice */
+  color: var(--paper-mute);
+}
+
+/* Horizontal hazard-tape stripe (background-image) */
+.hazard-tape {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--ink) 0 12px,
+    var(--hazard) 12px 24px
+  );
+}
+
+/* Grain overlay — fixed, full-screen, place once near body root */
+.grain {
+  position: fixed; inset: 0; pointer-events: none;
+  z-index: 9999; opacity: 0.07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}

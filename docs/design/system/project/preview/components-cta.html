@@ -1,0 +1,202 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Mega CTA</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  .stage {
+    position: relative;
+    width: 380px;
+    height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* outer rotating hazard ring */
+  .ring {
+    position: absolute;
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    border: 2px dashed var(--hazard);
+    animation: spin 14s linear infinite;
+  }
+  .ring.r2 {
+    width: 320px; height: 320px;
+    border: 1px solid var(--hazard-25);
+    border-style: solid;
+    animation: spin 22s linear infinite reverse;
+  }
+  .ring.r2::before {
+    content: "";
+    position: absolute; inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0 88%, var(--hazard) 90% 92%, transparent 94% 100%);
+    -webkit-mask: radial-gradient(circle, transparent 156px, #000 158px);
+            mask: radial-gradient(circle, transparent 156px, #000 158px);
+  }
+
+  /* curved label text around the ring */
+  .curve {
+    position: absolute;
+    width: 380px; height: 380px;
+    animation: spin 28s linear infinite;
+  }
+  .curve text {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    fill: var(--hazard);
+    text-transform: uppercase;
+  }
+
+  /* the button itself */
+  .cta {
+    position: relative;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: var(--hazard);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow:
+      0 0 0 6px var(--ink),
+      0 0 0 7px var(--hazard-25),
+      0 0 60px rgba(255,214,10,0.55);
+    animation: breathe 2.4s ease-in-out infinite;
+    overflow: hidden;
+  }
+
+  /* hazard-tape stripe across the middle */
+  .cta::before {
+    content: "";
+    position: absolute; left: -10px; right: -10px;
+    top: 50%; transform: translateY(-50%);
+    height: 14px;
+    background: repeating-linear-gradient(45deg, var(--ink) 0 8px, transparent 8px 16px);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  .cta-eyebrow {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--ink);
+    opacity: 0.7;
+    margin-bottom: 4px;
+    z-index: 2;
+  }
+  .cta-label {
+    font-family: var(--font-display);
+    font-size: 56px;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    text-transform: uppercase;
+    text-align: center;
+    padding-top: 6px;
+    z-index: 2;
+  }
+  .cta-arrow {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--ink);
+    margin-top: 8px;
+    z-index: 2;
+    animation: nudge 1.4s ease-in-out infinite;
+  }
+
+  /* pulse ring shooting out */
+  .pulse {
+    position: absolute;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    border: 2px solid var(--hazard);
+    animation: pulse 2s ease-out infinite;
+    pointer-events: none;
+  }
+  .pulse.p2 { animation-delay: 0.66s; }
+  .pulse.p3 { animation-delay: 1.32s; }
+
+  /* corner ticks */
+  .tick {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--hazard);
+    text-transform: uppercase;
+  }
+  .tick.tl { top: -6px; left: 0; }
+  .tick.tr { top: -6px; right: 0; text-align: right; }
+  .tick.bl { bottom: -6px; left: 0; }
+  .tick.br { bottom: -6px; right: 0; text-align: right; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 6px var(--ink), 0 0 0 7px var(--hazard-25), 0 0 60px rgba(255,214,10,0.55); }
+    50%      { transform: scale(1.025); box-shadow: 0 0 0 6px var(--ink), 0 0 0 7px var(--hazard), 0 0 90px rgba(255,214,10,0.85); }
+  }
+  @keyframes pulse {
+    0%   { transform: scale(1);    opacity: 0.9; }
+    100% { transform: scale(1.55); opacity: 0; }
+  }
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(4px); }
+  }
+</style>
+</head>
+<body><div class="card" style="padding:28px;">
+  <div class="eyebrow-mini">── COMPONENT / MEGA CTA · CIRCULAR · LIVE ANIMATION</div>
+
+  <div style="display:flex;gap:24px;align-items:center;">
+    <div class="stage">
+      <span class="tick tl">▌ 16+ ONLY</span>
+      <span class="tick tr">N°02947</span>
+      <span class="tick bl">04.28.26</span>
+      <span class="tick br">NO CAP</span>
+
+      <div class="ring"></div>
+      <div class="ring r2"></div>
+
+      <svg class="curve" viewBox="0 0 380 380">
+        <defs>
+          <path id="circ" d="M 190,190 m -150,0 a 150,150 0 1,1 300,0 a 150,150 0 1,1 -300,0" />
+        </defs>
+        <text>
+          <textPath href="#circ" startOffset="0">
+            ◉ AURA MEASUREMENT STATION · CALIBRATING · SIGMA DETECTED · NO CAP VERIFIED · 
+          </textPath>
+        </text>
+      </svg>
+
+      <div class="pulse"></div>
+      <div class="pulse p2"></div>
+      <div class="pulse p3"></div>
+
+      <div class="cta">
+        <div class="cta-eyebrow">▌ TAP TO COOK</div>
+        <div class="cta-label">GET<br>COOKED.</div>
+        <div class="cta-arrow">→</div>
+      </div>
+    </div>
+
+    <div style="flex:1;font-family:var(--font-mono);font-size:11px;color:var(--paper-mute);line-height:1.7;">
+      <div style="font-family:var(--font-mono);font-weight:700;font-size:10px;color:var(--hazard);letter-spacing:0.25em;margin-bottom:10px;">▌ MOTION</div>
+      • outer ring · 14s spin · dashed<br>
+      • inner ring · 22s reverse · indicator<br>
+      • orbital text · 28s spin · slogan loop<br>
+      • core · 2.4s breathe · scale + glow<br>
+      • pulse rings · 2s · 3 staggered<br>
+      • arrow · 1.4s nudge
+      <div style="margin-top:14px;font-family:var(--font-mono);font-weight:700;font-size:10px;color:var(--blood);letter-spacing:0.25em;">▌ TAP STATE</div>
+      <div style="color:var(--paper-mute);">snap-down · 0ms · all motion freezes for 60ms before slam-cut to camera</div>
+    </div>
+  </div>
+</div></body></html>
