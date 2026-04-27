@@ -3,3 +3,7 @@
 .DS_Store
 node_modules/
 .claude/
+
+# Local-only Obsidian vault — sensitive (investor lists, fundraise prep, etc.)
+# Never commit. Back up separately via Obsidian Sync or a private vault repo.
+Memory/
