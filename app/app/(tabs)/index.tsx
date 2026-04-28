@@ -30,6 +30,7 @@ import { LensPicker } from "../../src/components/LensPicker";
 import { capture } from "../../src/lib/analytics";
 import DossierLoadingScreen from "../../src/components/DossierLoadingScreen";
 import SkibidiTopTier from "../../src/components/SkibidiTopTier";
+import MegaCTA from "../../src/components/MegaCTA";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const LOADING_MESSAGES = [
@@ -469,19 +470,9 @@ export default function VibeCheckScreen() {
           <Text style={styles.eyebrow}>02 / DROP THE PIC</Text>
         </View>
 
-        {/* Big CTA — opens native camera */}
+        {/* Mega CTA — circular, breathing, orbital text */}
         <View style={styles.ctaArea}>
-          <TouchableOpacity
-            onPress={takePhoto}
-            activeOpacity={0.85}
-            style={styles.ctaBlock}
-          >
-            <Text style={styles.ctaHeadline}>GET{"\n"}COOKED.</Text>
-            <View style={styles.ctaMeta}>
-              <Text style={styles.ctaArrow}>→</Text>
-              <Text style={styles.ctaMetaText}>TAP TO OPEN CAMERA</Text>
-            </View>
-          </TouchableOpacity>
+          <MegaCTA onPress={takePhoto} />
 
           {error && (
             <View style={styles.errorBox}>

@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, SPACING, FONTS, displayText } from "../constants/theme";
 import GrainOverlay from "./design/GrainOverlay";
 import { capture } from "../lib/analytics";
+import TierBadge, { tierKeyFromName } from "./TierBadge";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
@@ -49,18 +50,6 @@ interface AuraResultCardProps {
   username?: string;
   isSaved?: boolean;
   onToggleSave?: () => void;
-}
-
-function getTierLabel(tier: string): string {
-  const upper = tier.toUpperCase();
-  if (upper.includes("SKIBIDI")) return "SKIBIDI LEGEND";
-  if (upper.includes("MOG GOD")) return "MOG GOD";
-  if (upper.includes("SIGMA")) return "SIGMA";
-  if (upper.includes("HIM") || upper.includes("HER")) return "HIM / HER";
-  if (upper.includes("COOK")) return "COOKING";
-  if (upper.includes("6") || upper.includes("SEVEN")) return "SIX — SEVEN";
-  if (upper.includes("NPC")) return "NPC";
-  return "DOWN BAD";
 }
 
 function pathStamp(path?: string): string {
@@ -106,7 +95,6 @@ export default function AuraResultCard({
   onToggleSave,
 }: AuraResultCardProps) {
   const cardRef = useRef<View>(null);
-  const tierLabel = getTierLabel(result.tier);
   const stats = (result.stats || []).slice(0, 5);
 
   const captureCard = async (): Promise<string | null> => {
@@ -229,7 +217,9 @@ export default function AuraResultCard({
               {String(result.aura_score)}
             </Text>
 
-            <Text style={styles.tierLabel}>{tierLabel}</Text>
+            <View style={styles.tierBadgeWrap}>
+              <TierBadge tier={tierKeyFromName(result.tier)} size="sm" />
+            </View>
 
             <View style={styles.divider} />
 
@@ -410,6 +400,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textTransform: "uppercase",
     marginTop: -4,
+  },
+  tierBadgeWrap: {
+    marginTop: 4,
+    marginBottom: 2,
   },
   divider: {
     height: 1,
