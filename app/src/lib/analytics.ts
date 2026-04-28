@@ -1,11 +1,11 @@
-import { PostHog } from "posthog-react-native";
-
-// Lazy singleton — only init if env vars are set.
-// In dev / test contexts without PostHog config, capture() is a no-op.
-let client: PostHog | null = null;
+// Lazy require + lazy singleton — only init if env vars are set AND the
+// native module is available. Required for Expo Go compatibility (PostHog
+// has native dependencies not bundled into Expo Go). In a real dev-client
+// or production build the require resolves and analytics works.
+let client: any = null;
 let initialized = false;
 
-function getClient(): PostHog | null {
+function getClient(): any {
   if (initialized) return client;
   initialized = true;
 
@@ -14,6 +14,7 @@ function getClient(): PostHog | null {
   if (!apiKey) return null;
 
   try {
+    const { PostHog } = require("posthog-react-native");
     client = new PostHog(apiKey, {
       host,
       flushAt: 20,
@@ -21,7 +22,7 @@ function getClient(): PostHog | null {
       captureAppLifecycleEvents: false, // we capture our own app_open with semantics
     });
   } catch (e) {
-    console.warn("[analytics] init failed:", e);
+    console.warn("[analytics] init failed (likely Expo Go — PostHog native module missing):", e);
     client = null;
   }
 
