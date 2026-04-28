@@ -29,6 +29,7 @@ import { ModerationRejectCard } from "../../src/components/ModerationRejectCard"
 import { LensPicker } from "../../src/components/LensPicker";
 import { capture } from "../../src/lib/analytics";
 import DossierLoadingScreen from "../../src/components/DossierLoadingScreen";
+import SkibidiTopTier from "../../src/components/SkibidiTopTier";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const LOADING_MESSAGES = [
@@ -369,6 +370,21 @@ export default function VibeCheckScreen() {
 
   // ─── RESULT VIEW ───
   if (result && !loading) {
+    // Skibidi 1000 — full-screen blowout for the rare-max state
+    if (result.aura_score >= 1000) {
+      return (
+        <SafeAreaView style={styles.container} edges={["top"]}>
+          <SkibidiTopTier
+            score={result.aura_score}
+            roast={result.roast}
+            username={profile?.username}
+            sigmaPath={selectedPath}
+            onContinue={handleReset}
+          />
+        </SafeAreaView>
+      );
+    }
+
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
         <ScrollView
